@@ -63,7 +63,10 @@ async function once(label, model) {
   console.log("model requested:", model);
   console.log("model returned: ", completion.model);
   console.log("content:        ", content);
-  console.log("id:             ", completion.id);
+  console.log(
+    "audit:          ",
+    `https://openrouter.ai/api/v1/generation?id=${completion.id}`,
+  );
   console.log("latency_ms:     ", latencyMs);
   console.log("prompt_tokens:  ", usage.prompt_tokens);
   console.log("completion_tok: ", usage.completion_tokens);
@@ -106,6 +109,4 @@ console.log("paid latency_ms:", paid.latencyMs);
 console.log(
   "\nHabit for Bridge: log model, tokens, cost, latency_ms on every completion.",
 );
-console.log(
-  "Optional audit: GET https://openrouter.ai/api/v1/generation?id=<completion.id>",
-);
+console.log("Optional audit URLs above need your OpenRouter Bearer token.");
