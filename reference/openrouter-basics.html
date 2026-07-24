@@ -59,7 +59,7 @@
 openai/gpt-4o-mini
 anthropic/claude-sonnet-4
 google/gemini-2.5-flash
-meta-llama/llama-3.2-3b-instruct:free</pre>
+provider/model:free   ← pin only after confirming it is still free</pre>
   <p>
     Prefer <code>provider/model</code> slugs from <a href="https://openrouter.ai/models">openrouter.ai/models</a>.
     Router aliases like <code>openrouter/free</code> pick among matching models for you — log the returned <code>model</code> to see what ran.
@@ -89,7 +89,10 @@ meta-llama/llama-3.2-3b-instruct:free</pre>
     </tbody>
   </table>
   <p>
-    Free lists churn; rate limits and availability vary. Always compare <em>requested</em> vs <em>returned</em> <code>model</code>.
+    Free lists churn hard: a <code>:free</code> slug can 404 as “unavailable for free” while the paid slug still works
+    (seen with former free pins like <code>meta-llama/llama-3.2-3b-instruct:free</code> and <code>tencent/hy3:free</code>).
+    Prefer <code>openrouter/free</code> for exploration; pin only a slug you just verified (router response or
+    <a href="https://openrouter.ai/models?q=free">models?q=free</a>). Always compare <em>requested</em> vs <em>returned</em> <code>model</code>.
   </p>
 
   <h2>OpenAI SDK drop-in</h2>

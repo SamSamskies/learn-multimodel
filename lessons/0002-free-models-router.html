@@ -86,14 +86,17 @@
   <pre class="example">// Router — you don't choose the upstream
 model: "openrouter/free"
 
-// Pin — you do (example slug; check the catalog — free lists change)
-model: "meta-llama/llama-3.2-3b-instruct:free"</pre>
+// Pin — you do. Copy a live slug from the catalog or from a router response.
+// Hardcoded :free ids go stale (today's free can be tomorrow's paid-only).
+model: "some-provider/some-model:free"</pre>
 
   <div class="callout warn">
-    <strong>Limits (from the docs)</strong><br>
+    <strong>Limits (from the docs) + catalog churn</strong><br>
     Free models can have tighter rate limits, higher peak latency, and uneven availability.
     The router does <em>not</em> let you control which free model is selected —
     that is what <code>:free</code> on a specific slug is for.
+    A <code>:free</code> slug can also disappear (404 “unavailable for free”) while the paid
+    slug remains — treat free pins as ephemeral, not forever defaults.
   </div>
 
   <h2>Check your understanding</h2>
@@ -134,13 +137,13 @@ model: "meta-llama/llama-3.2-3b-instruct:free"</pre>
     <p><strong>~10-minute win:</strong> see the router pick vs a pinned <code>:free</code> slug.</p>
     <ol>
       <li>From the repo root: <code>npm run practice -- 2</code></li>
-      <li>Read three completions: two via <code>openrouter/free</code>, one via a pinned <code>:free</code> model</li>
-      <li>Compare <code>model requested</code> vs <code>model returned</code> — the router’s returned slug should look like a real catalog entry (often ending in <code>:free</code>)</li>
-      <li>Optional: browse current free models on <a href="https://openrouter.ai/models?q=free">openrouter.ai/models</a> and rerun with <code>npm run practice -- 2 --model some/slug:free</code></li>
+      <li>Read three completions: two via <code>openrouter/free</code>, then one that <em>pins</em> the slug the router just returned (so the pin stays live as free catalogs churn)</li>
+      <li>Compare <code>model requested</code> vs <code>model returned</code> — router requests stay <code>openrouter/free</code>; the pin request should be a real catalog entry (often ending in <code>:free</code>)</li>
+      <li>Optional: browse <a href="https://openrouter.ai/models?q=free">openrouter.ai/models</a> and pin your own: <code>npm run practice -- 2 --model some/slug:free</code></li>
     </ol>
     <p>
       When those three lines make sense, you can explore models for free without confusing
-      “router alias” with “model identity” — a prerequisite for honest benchmarks later.
+      “router alias” with “model identity” — and without baking stale free slugs into Bridge defaults.
     </p>
   </div>
 

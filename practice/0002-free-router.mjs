@@ -2,8 +2,8 @@
  * Lesson 2 — Free Models Router vs pinned :free variant.
  * Requires OPENROUTER_API_KEY in .env (see .env.example).
  *
- * Override the pinned free model with:
- *   npm run practice -- 2 --model some/slug:free
+ * Default: pin whatever the router just returned (free catalogs churn).
+ * Override: npm run practice -- 2 --model some/slug:free
  * or OPENROUTER_FREE_PIN in .env
  */
 import "dotenv/config";
@@ -16,16 +16,13 @@ if (!apiKey) {
 }
 
 /**
- * Pin for the third call. Ignore OPENROUTER_MODEL when it is the Lesson 1
+ * Explicit pin override. Ignore OPENROUTER_MODEL when it is the Lesson 1
  * router default so .env does not turn the pin into another router call.
- * Override: npm run practice -- 2 --model some/slug:free
- * or OPENROUTER_FREE_PIN in .env
  */
 const modelEnv = process.env.OPENROUTER_MODEL;
-const pinnedFree =
+const pinOverride =
   process.env.OPENROUTER_FREE_PIN ??
-  (modelEnv && modelEnv !== "openrouter/free" ? modelEnv : undefined) ??
-  "meta-llama/llama-3.2-3b-instruct:free";
+  (modelEnv && modelEnv !== "openrouter/free" ? modelEnv : undefined);
 
 const client = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -58,9 +55,18 @@ async function once(label, model) {
 
 console.log("Lesson 2: router vs pinned :free");
 console.log("Watch requested vs returned — openrouter/free is a router, not a model.");
+console.log("Free :free slugs come and go; we pin a live slug from the router by default.");
 
 const first = await once("router call A", "openrouter/free");
 const second = await once("router call B", "openrouter/free");
+
+const pinnedFree = pinOverride ?? first;
+if (!pinOverride) {
+  console.log(`\n(no pin override — reusing router A's returned slug as the pin)`);
+} else {
+  console.log(`\n(using pin override: ${pinOverride})`);
+}
+
 const pinned = await once("pinned :free", pinnedFree);
 
 console.log("\n--- compare ---");
@@ -70,8 +76,15 @@ console.log(
   "same upstream both times?",
   first === second ? "yes (possible — random can repeat)" : "no (expected often)",
 );
-console.log("pinned returned:  ", pinned);
+console.log("pin requested:    ", pinnedFree);
+console.log("pin returned:     ", pinned);
 console.log(
-  "\nIf the pinned call failed, pick a live :free slug from https://openrouter.ai/models?q=free",
+  "pin matched request?",
+  pinned === pinnedFree
+    ? "yes — you asked for a specific free model and got it"
+    : "check returned slug (aliases / routing can differ slightly)",
 );
-console.log("and rerun: npm run practice -- 2 --model provider/model:free");
+console.log(
+  "\nOptional: pin a catalog slug yourself — npm run practice -- 2 --model provider/model:free",
+);
+console.log("Browse live free models: https://openrouter.ai/models?q=free");

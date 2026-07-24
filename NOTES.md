@@ -27,7 +27,8 @@
 
 ## Teaching note (2026-07-24)
 - User finds the lesson format fun — keep ~15–20 min, build-heavy, one tangible win
-- Free catalog slugs churn; practice/0002 pins `meta-llama/llama-3.2-3b-instruct:free` with `--model` override
+- Free catalog slugs churn hard (`:free` → paid-only 404). practice/0002 pins the router’s returned slug by default; `--model` / `OPENROUTER_FREE_PIN` for explicit live pins only
+- Known stale examples: `meta-llama/llama-3.2-3b-instruct:free`, `tencent/hy3:free`
 
 ## Proving ground priorities
 1. **Inference Bridge** providers (OpenRouter → Anthropic → Routstr; PPQ later)
