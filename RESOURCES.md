@@ -6,6 +6,10 @@
   Official entry point: Chat Completions, OpenAI SDK drop-in (`baseURL`), optional attribution headers. Use for: first calls and Integration Bridge adapter shape.
 - [OpenRouter Models](https://openrouter.ai/models)
   Live catalog with pricing and provider metadata. Use for: picking cheap practice models and reading `$` before you call.
+- [Free Models Router (`openrouter/free`)](https://openrouter.ai/docs/guides/routing/routers/free-router)
+  Router that picks an available free model (capability-aware). Contrast with `:free` variant on a specific slug. Use for: future free-router lesson after Lesson 1.
+- [Fusion (`openrouter/fusion`)](https://openrouter.ai/docs/guides/features/plugins/fusion)
+  Multi-model deliberation (panel + judge); also available as plugin/server tool. Billed as sum of underlying completions. Catalog page: [openrouter/fusion](https://openrouter.ai/openrouter/fusion). Use for: future Fusion lesson when single-model calls feel limiting.
 - [OpenRouter API Keys](https://openrouter.ai/settings/keys)
   Key creation and credit management. Use for: setup before Lesson 1 practice.
 - [OpenRouter + Cursor integration](https://openrouter.ai/docs/cookbook/coding-agents/cursor-integration)

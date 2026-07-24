@@ -18,6 +18,11 @@
 3. PPQ.ai (alternate gateway — crypto / pay-per-use contrast)
 4. Routstr (decentralized, Cashu, Nostr discovery)
 
+## Future OpenRouter lessons (queued)
+- **`openrouter/free`** — free-models router (capability filter + random free pick); also teach `:free` variant for pinning a specific free model. Docs: https://openrouter.ai/docs/guides/routing/routers/free-router
+- **`openrouter/fusion`** — multi-model deliberation (panel + judge + web tools); price = sum of underlying completions; Quality/Budget presets or override via fusion plugin. Reach for when cost-of-wrong > extra completions. Docs: https://openrouter.ai/docs/guides/features/plugins/fusion · catalog: https://openrouter.ai/openrouter/fusion
+- Suggested order after Lesson 1: free router (cheap exploration) → then Fusion (when comparing/routing judgment matters)
+
 ## Proving ground priorities
 1. **Inference Bridge** providers (OpenRouter → Anthropic → Routstr; PPQ later)
 2. Lightweight **benchmark** harness for model contrast
