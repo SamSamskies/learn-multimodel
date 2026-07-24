@@ -55,11 +55,15 @@
   <p>Keys live at <a href="https://openrouter.ai/settings/keys">openrouter.ai/settings/keys</a>. Credits are separate from Cursor Pro and OpenAI platform billing.</p>
 
   <h2>Model IDs</h2>
-  <p>Prefer <code>provider/model</code> slugs from <a href="https://openrouter.ai/models">openrouter.ai/models</a>.</p>
-  <pre class="example">openai/gpt-4o-mini
+  <pre class="example">openrouter/free
+openai/gpt-4o-mini
 anthropic/claude-sonnet-4
 google/gemini-2.5-flash</pre>
-  <p>Router aliases (when documented) may use a <code>~</code> prefix — copy the exact string from the catalog.</p>
+  <p>
+    Prefer <code>provider/model</code> slugs from <a href="https://openrouter.ai/models">openrouter.ai/models</a>.
+    Router aliases like <code>openrouter/free</code> pick among matching models for you — log the returned <code>model</code> to see what ran.
+    Some catalog entries use a <code>~</code> prefix — copy the exact string from the docs.
+  </p>
 
   <h2>OpenAI SDK drop-in</h2>
   <pre class="example">import OpenAI from "openai";

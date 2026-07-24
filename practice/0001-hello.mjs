@@ -11,7 +11,7 @@ if (!apiKey) {
   process.exit(1);
 }
 
-const model = process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini";
+const model = process.env.OPENROUTER_MODEL ?? "openrouter/free";
 
 const client = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",

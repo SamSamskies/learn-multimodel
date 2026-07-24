@@ -214,8 +214,8 @@ console.log(completion.model);</pre>
       <li>At the repo root: <code>npm install</code></li>
       <li>Copy <code>.env.example</code> → <code>.env</code> and set <code>OPENROUTER_API_KEY</code></li>
       <li>Run <code>npm run practice -- 1</code> (or <code>node practice/0001-hello.mjs</code>)</li>
-      <li>Confirm five words of greeting, a <code>usage</code> object, and a returned <code>model</code></li>
-      <li>Optional: try another cheap slug — <code>npm run practice -- 1 --model anthropic/claude-3.5-haiku</code> (or set <code>OPENROUTER_MODEL</code> in <code>.env</code>)</li>
+      <li>Confirm five words of greeting, a <code>usage</code> object, and a returned <code>model</code> (default slug is <code>openrouter/free</code> — a free-models router; the returned <code>model</code> names which upstream was chosen)</li>
+      <li>Optional: pin a specific slug — <code>npm run practice -- 1 --model openai/gpt-4o-mini</code> (or set <code>OPENROUTER_MODEL</code> in <code>.env</code>)</li>
     </ol>
     <p>
       When that works, you have the integration shape Inference Bridge needs for an OpenRouter provider —
