@@ -95,6 +95,40 @@ provider/model:free   ← pin only after confirming it is still free</pre>
     <a href="https://openrouter.ai/models?q=free">models?q=free</a>). Always compare <em>requested</em> vs <em>returned</em> <code>model</code>.
   </p>
 
+  <h2>Usage, cost, latency</h2>
+  <p>
+    Every Chat Completions response includes <code>usage</code> automatically
+    (<a href="https://openrouter.ai/docs/guides/administration/usage-accounting">Usage Accounting</a>).
+    No <code>include</code> flag — older options are deprecated.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Signal</th><th>Where</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Tokens</td>
+        <td><code>usage.prompt_tokens</code> / <code>completion_tokens</code> / <code>total_tokens</code> (native tokenizer)</td>
+      </tr>
+      <tr>
+        <td>Your bill</td>
+        <td><code>usage.cost</code> — credits charged for this call (SDK types may omit it; it is on the JSON)</td>
+      </tr>
+      <tr>
+        <td>Latency</td>
+        <td>Measure client-side around the await; optional audit via <code>GET /api/v1/generation?id=…</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <pre class="example">const t0 = performance.now();
+const completion = await client.chat.completions.create({ … });
+const latencyMs = Math.round(performance.now() - t0);
+console.log(completion.model, completion.usage, latencyMs);</pre>
+  <p>
+    Log <code>model</code> + tokens + <code>cost</code> + <code>latency_ms</code> on every call —
+    the habit Fusion and Bridge need before “which model won?” debates.
+  </p>
+
   <h2>OpenAI SDK drop-in</h2>
   <pre class="example">import OpenAI from "openai";
 
@@ -143,6 +177,7 @@ const client = new OpenAI({
       Lessons:
       <a href="../lessons/0001-first-openrouter-call.html">0001 First OpenRouter Call</a> ·
       <a href="../lessons/0002-free-models-router.html">0002 Free Models Router</a> ·
+      <a href="../lessons/0003-usage-and-cost.html">0003 Read Cost and Latency</a> ·
       Mission: <a href="../MISSION.md">MISSION.md</a>
     </p>
   </footer>

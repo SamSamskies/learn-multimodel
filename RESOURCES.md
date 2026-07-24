@@ -10,6 +10,12 @@
   Router that picks an available free model (capability-aware). Contrast with `:free` variant on a specific slug. Use for: Lesson 2.
 - [Free Variant (`:free`)](https://openrouter.ai/docs/guides/routing/model-variants/free)
   Append `:free` to pin a specific free catalog entry. Use for: Lesson 2 practice pin + Bridge defaults that must stay reproducible.
+- [Usage Accounting](https://openrouter.ai/docs/guides/administration/usage-accounting)
+  Per-response `usage` (tokens, `cost`, optional details). Always on; include flags deprecated. Use for: Lesson 3 — budget literacy before Fusion.
+- [API reference — ResponseUsage](https://openrouter.ai/docs/api/reference/overview)
+  Typed shape for `usage` fields including `cost` / `cost_details`. Use for: confirming field names in practice scripts.
+- [Generation metadata](https://openrouter.ai/docs/api/api-reference/generations/get-request-&-usage-metadata-for-a-generation)
+  `GET /api/v1/generation?id=` for post-hoc cost/latency/provider stats. Use for: auditing after a call when the completion body isn’t enough.
 - [Fusion (`openrouter/fusion`)](https://openrouter.ai/docs/guides/features/plugins/fusion)
   Multi-model deliberation (panel + judge); also available as plugin/server tool. Billed as sum of underlying completions. Catalog page: [openrouter/fusion](https://openrouter.ai/openrouter/fusion). Use for: future Fusion lesson when single-model calls feel limiting.
 - [OpenRouter API Keys](https://openrouter.ai/settings/keys)

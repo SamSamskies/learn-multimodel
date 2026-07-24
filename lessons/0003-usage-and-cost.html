@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 3 — Read Cost and Latency</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 3 · ~15 minutes</div>
+  <h1>Read Cost and Latency</h1>
+
+  <p class="epigraph">
+    Quality without a bill is half a decision.
+    Every completion already tells you tokens, credits, and (if you time it) latency.
+  </p>
+
+  <p>
+    Your mission success criteria include reading
+    <em>cost and latency signals on each call</em> — the same evidence habit as Phase 3 evals,
+    applied to gateway routing. You already log returned <code>model</code>
+    (<a href="./0002-free-models-router.html">Lesson 2</a>).
+    Now read the rest of the receipt.
+  </p>
+
+  <h2>Usage is always there</h2>
+
+  <p>
+    Per OpenRouter’s
+    <a href="https://openrouter.ai/docs/guides/administration/usage-accounting">Usage Accounting</a>
+    guide, every Chat Completions response includes a <code>usage</code> object —
+    no extra request flag. Older <code>usage: { include: true }</code> options are
+    <strong>deprecated and ignored</strong>; details arrive by default (including on the final
+    streaming chunk).
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>prompt_tokens</code> / <code>completion_tokens</code> / <code>total_tokens</code></td>
+        <td>Counts from the model’s <em>native</em> tokenizer (what pricing uses).</td>
+      </tr>
+      <tr>
+        <td><code>cost</code></td>
+        <td>Credits charged to <em>your</em> OpenRouter account for this call.</td>
+      </tr>
+      <tr>
+        <td><code>cost_details</code></td>
+        <td>Optional breakdown (e.g. upstream inference). Most useful for BYOK later.</td>
+      </tr>
+      <tr>
+        <td><code>*_tokens_details</code></td>
+        <td>Optional: cached tokens, reasoning tokens, etc. when the model exposes them.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <pre class="example">// Shape from OpenRouter docs (fields may be omitted when zero / N/A)
+usage: {
+  prompt_tokens: 194,
+  completion_tokens: 2,
+  total_tokens: 196,
+  cost: 0.000014,           // ← your bill for this call
+  cost_details: { … },
+  prompt_tokens_details: { cached_tokens: 0, … },
+  completion_tokens_details: { reasoning_tokens: 0, … }
+}</pre>
+
+  <div class="callout warn">
+    <strong>SDK typing caveat</strong><br>
+    The official OpenAI SDK types <code>usage</code> as the standard token trio.
+    OpenRouter’s <code>cost</code> is still on the live JSON — log
+    <code>completion.usage</code> (or cast) and look for <code>cost</code>, don’t assume TypeScript knows it.
+  </div>
+
+  <h2>Latency is yours to measure</h2>
+
+  <p>
+    OpenRouter does not put wall-clock latency in the Chat Completions body.
+    Time the call yourself (<code>performance.now()</code> around
+    <code>chat.completions.create</code>). For richer post-hoc stats (including
+    provider-side timings), query
+    <a href="https://openrouter.ai/docs/api/api-reference/generations/get-request-&amp;-usage-metadata-for-a-generation">GET /api/v1/generation</a>
+    with the completion’s <code>id</code>.
+  </p>
+
+  <div class="callout">
+    <strong>Mission link</strong><br>
+    Before you reach for
+    <a href="https://openrouter.ai/docs/guides/features/plugins/fusion">Fusion</a>
+    (cost = sum of panel + judge completions), you need this habit:
+    every call logs <code>model</code>, tokens, <code>usage.cost</code>, and <code>latency_ms</code>.
+    That is the plumbing Inference Bridge will need to surface “why this model?” without vibes.
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. OpenRouter returns usage (including cost) on every response by default.","false":"No include flag needed — usage accounting is automatic; optional flags are deprecated."}'>
+    <h3>1. How do you get per-call usage from OpenRouter?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Read usage on each response</button>
+      <button data-correct="false">Pass include usage each time</button>
+      <button data-correct="false">Wait for monthly email totals</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. usage.cost is credits charged to your OpenRouter account for that call.","false":"cost is your bill for the call — not the model slug and not only the invoice later."}'>
+    <h3>2. What does <code>usage.cost</code> represent?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Credits billed for that call</button>
+      <button data-correct="false">Catalog price for that slug</button>
+      <button data-correct="false">Latency measured for that call</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. Time the request client-side; optional generation lookup adds more stats later.","false":"Wall-clock latency is not a required Chat Completions field — measure around the await."}'>
+    <h3>3. How should you capture wall-clock latency?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Time the await yourself now</button>
+      <button data-correct="false">Treat usage cost as latency</button>
+      <button data-correct="false">Skip all timing for now</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~10-minute win:</strong> see $0 free vs a tiny paid cost side by side.</p>
+    <ol>
+      <li>From the repo root: <code>npm run practice -- 3</code></li>
+      <li>Compare two completions: <code>openrouter/free</code> vs <code>openai/gpt-4o-mini</code> (tiny prompt)</li>
+      <li>Confirm free <code>cost</code> is <code>0</code> (or effectively free) and paid <code>cost</code> is a small positive number</li>
+      <li>Note <code>latency_ms</code> for both — free is often slower or spikier; that is data, not a bug</li>
+      <li>Optional: swap the paid slug — <code>npm run practice -- 3 --model google/gemini-2.5-flash</code></li>
+    </ol>
+    <p>
+      When you can point at <code>cost</code> and <code>latency_ms</code> without opening the dashboard,
+      you have the measurement loop for multi-model product decisions.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary source:
+    <a href="https://openrouter.ai/docs/guides/administration/usage-accounting">Usage Accounting</a>
+    (plus the
+    <a href="https://openrouter.ai/docs/api/reference/overview">API reference</a>
+    <code>ResponseUsage</code> shape).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Prev: <a href="./0002-free-models-router.html">0002 Free Models Router</a> ·
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>
