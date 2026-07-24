@@ -7,7 +7,9 @@
 - [OpenRouter Models](https://openrouter.ai/models)
   Live catalog with pricing and provider metadata. Use for: picking cheap practice models and reading `$` before you call.
 - [Free Models Router (`openrouter/free`)](https://openrouter.ai/docs/guides/routing/routers/free-router)
-  Router that picks an available free model (capability-aware). Contrast with `:free` variant on a specific slug. Use for: future free-router lesson after Lesson 1.
+  Router that picks an available free model (capability-aware). Contrast with `:free` variant on a specific slug. Use for: Lesson 2.
+- [Free Variant (`:free`)](https://openrouter.ai/docs/guides/routing/model-variants/free)
+  Append `:free` to pin a specific free catalog entry. Use for: Lesson 2 practice pin + Bridge defaults that must stay reproducible.
 - [Fusion (`openrouter/fusion`)](https://openrouter.ai/docs/guides/features/plugins/fusion)
   Multi-model deliberation (panel + judge); also available as plugin/server tool. Billed as sum of underlying completions. Catalog page: [openrouter/fusion](https://openrouter.ai/openrouter/fusion). Use for: future Fusion lesson when single-model calls feel limiting.
 - [OpenRouter API Keys](https://openrouter.ai/settings/keys)

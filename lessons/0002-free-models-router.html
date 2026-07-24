@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 — Free Models Router vs :free</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 2 · ~15 minutes</div>
+  <h1>Free Models Router vs <code>:free</code></h1>
+
+  <p class="epigraph">
+    Zero-cost inference is a routing decision — not a model identity.
+    Know which you asked for, and which actually answered.
+  </p>
+
+  <p>
+    In <a href="./0001-first-openrouter-call.html">Lesson 1</a> you already called
+    <code>openrouter/free</code>. That slug is not a model — it is OpenRouter’s
+    <a href="https://openrouter.ai/docs/guides/routing/routers/free-router">Free Models Router</a>:
+    it filters free catalog entries that can handle your request, then picks one at random.
+    Budget-conscious Phase 4 work starts here: explore cheaply, then pin when reproducibility matters.
+  </p>
+
+  <h2>Two ways to stay free</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Slug shape</th>
+        <th>What it does</th>
+        <th>When to use it</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>openrouter/free</code></td>
+        <td>Router: capability filter → random free model</td>
+        <td>Exploration, demos, “any free answer is fine”</td>
+      </tr>
+      <tr>
+        <td><code>provider/model:free</code></td>
+        <td>
+          <a href="https://openrouter.ai/docs/guides/routing/model-variants/free">Free variant</a>:
+          pin one free catalog entry
+        </td>
+        <td>You need a known free model for compares / Bridge defaults</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Mission link</strong><br>
+    Choosing with evidence means knowing <em>what ran</em>. The router hides selection;
+    the response’s <code>model</code> field reveals it. Log requested vs returned every time —
+    the same habit you will need when Inference Bridge routes across providers.
+  </div>
+
+  <h2>How the router decides</h2>
+
+  <p>
+    Per the
+    <a href="https://openrouter.ai/docs/guides/routing/routers/free-router">official free-router guide</a>:
+  </p>
+
+  <div class="steps">
+    <div class="step">
+      <strong>Analyze</strong>
+      <span>Inspect the request for required capabilities (vision, tools, structured outputs, …).</span>
+    </div>
+    <div class="step">
+      <strong>Filter</strong>
+      <span>Keep only currently available free models that support those capabilities.</span>
+    </div>
+    <div class="step">
+      <strong>Pick</strong>
+      <span>Choose one at random from that filtered pool and forward the request.</span>
+    </div>
+    <div class="step">
+      <strong>Report</strong>
+      <span>Return the usual Chat Completions payload; <code>model</code> names the upstream that ran (often with a <code>:free</code> suffix).</span>
+    </div>
+  </div>
+
+  <pre class="example">// Router — you don't choose the upstream
+model: "openrouter/free"
+
+// Pin — you do (example slug; check the catalog — free lists change)
+model: "meta-llama/llama-3.2-3b-instruct:free"</pre>
+
+  <div class="callout warn">
+    <strong>Limits (from the docs)</strong><br>
+    Free models can have tighter rate limits, higher peak latency, and uneven availability.
+    The router does <em>not</em> let you control which free model is selected —
+    that is what <code>:free</code> on a specific slug is for.
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. openrouter/free filters capable free models, then picks one at random.","false":"Not quite. The router selects among free models — it does not pin one slug or invent paid-as-free."}'>
+    <h3>1. What does <code>openrouter/free</code> do?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Selects a capable free model</button>
+      <button data-correct="false">Requires a named free model</button>
+      <button data-correct="false">Charges for every free model</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. Append :free when you need a specific free catalog entry, not a random pick.","false":"Use the router when any free model is fine; use :free when you must pin one."}'>
+    <h3>2. Prefer the <code>:free</code> suffix when you…</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Pin one exact free model</button>
+      <button data-correct="false">Allow any free model pick</button>
+      <button data-correct="false">Use only paid model names</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. The response model field names the upstream that actually ran.","false":"Always log returned model — requested openrouter/free is a router, not the runner."}'>
+    <h3>3. Why log the returned <code>model</code> field?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Know which upstream model ran</button>
+      <button data-correct="false">Ignore which upstream model ran</button>
+      <button data-correct="false">Guess which upstream model ran</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~10-minute win:</strong> see the router pick vs a pinned <code>:free</code> slug.</p>
+    <ol>
+      <li>From the repo root: <code>npm run practice -- 2</code></li>
+      <li>Read three completions: two via <code>openrouter/free</code>, one via a pinned <code>:free</code> model</li>
+      <li>Compare <code>model requested</code> vs <code>model returned</code> — the router’s returned slug should look like a real catalog entry (often ending in <code>:free</code>)</li>
+      <li>Optional: browse current free models on <a href="https://openrouter.ai/models?q=free">openrouter.ai/models</a> and rerun with <code>npm run practice -- 2 --model some/slug:free</code></li>
+    </ol>
+    <p>
+      When those three lines make sense, you can explore models for free without confusing
+      “router alias” with “model identity” — a prerequisite for honest benchmarks later.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary source:
+    <a href="https://openrouter.ai/docs/guides/routing/routers/free-router">Free Models Router</a>
+    (plus the related
+    <a href="https://openrouter.ai/docs/guides/routing/model-variants/free">Free Variant</a> page).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Prev: <a href="./0001-first-openrouter-call.html">0001 First OpenRouter Call</a> ·
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

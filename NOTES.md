@@ -18,10 +18,16 @@
 3. PPQ.ai (alternate gateway — crypto / pay-per-use contrast)
 4. Routstr (decentralized, Cashu, Nostr discovery)
 
-## Future OpenRouter lessons (queued)
-- **`openrouter/free`** — free-models router (capability filter + random free pick); also teach `:free` variant for pinning a specific free model. Docs: https://openrouter.ai/docs/guides/routing/routers/free-router
+## OpenRouter lesson sequence
+- ✅ Lesson 1 — first OpenRouter call (SDK drop-in)
+- ✅ / in progress Lesson 2 — `openrouter/free` vs `:free` pin
+- **Next after 2:** usage / cost signals on responses (read `$` before Fusion) OR list models API — keep budget literacy tight
 - **`openrouter/fusion`** — multi-model deliberation (panel + judge + web tools); price = sum of underlying completions; Quality/Budget presets or override via fusion plugin. Reach for when cost-of-wrong > extra completions. Docs: https://openrouter.ai/docs/guides/features/plugins/fusion · catalog: https://openrouter.ai/openrouter/fusion
-- Suggested order after Lesson 1: free router (cheap exploration) → then Fusion (when comparing/routing judgment matters)
+- Then: provider preferences / fallbacks → Inference Bridge OpenRouter adapter
+
+## Teaching note (2026-07-24)
+- User finds the lesson format fun — keep ~15–20 min, build-heavy, one tangible win
+- Free catalog slugs churn; practice/0002 pins `meta-llama/llama-3.2-3b-instruct:free` with `--model` override
 
 ## Proving ground priorities
 1. **Inference Bridge** providers (OpenRouter → Anthropic → Routstr; PPQ later)

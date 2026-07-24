@@ -58,11 +58,38 @@
   <pre class="example">openrouter/free
 openai/gpt-4o-mini
 anthropic/claude-sonnet-4
-google/gemini-2.5-flash</pre>
+google/gemini-2.5-flash
+meta-llama/llama-3.2-3b-instruct:free</pre>
   <p>
     Prefer <code>provider/model</code> slugs from <a href="https://openrouter.ai/models">openrouter.ai/models</a>.
     Router aliases like <code>openrouter/free</code> pick among matching models for you — log the returned <code>model</code> to see what ran.
     Some catalog entries use a <code>~</code> prefix — copy the exact string from the docs.
+  </p>
+
+  <h2>Free routing</h2>
+  <table>
+    <thead>
+      <tr><th>Slug</th><th>Meaning</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>openrouter/free</code></td>
+        <td>
+          <a href="https://openrouter.ai/docs/guides/routing/routers/free-router">Free Models Router</a>:
+          filter free models by request capabilities, then pick one at random. $0 for router + free upstreams.
+        </td>
+      </tr>
+      <tr>
+        <td><code>provider/model:free</code></td>
+        <td>
+          <a href="https://openrouter.ai/docs/guides/routing/model-variants/free">Free variant</a>:
+          pin a specific free catalog entry. Use when you need a known model, not a random free pick.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Free lists churn; rate limits and availability vary. Always compare <em>requested</em> vs <em>returned</em> <code>model</code>.
   </p>
 
   <h2>OpenAI SDK drop-in</h2>
@@ -91,6 +118,14 @@ const client = new OpenAI({
     <dt>Provider (Inference Bridge sense)</dt>
     <dd>An adapter in the extension (<code>openai</code>, <code>ollama</code>, soon <code>openrouter</code>) that implements <code>streamChat</code>.</dd>
   </dl>
+  <dl class="term">
+    <dt>Router (OpenRouter)</dt>
+    <dd>A special model id that selects among other models (e.g. <code>openrouter/free</code>). Not itself an upstream model — read the returned <code>model</code>.</dd>
+  </dl>
+  <dl class="term">
+    <dt>Variant suffix</dt>
+    <dd>A <code>:</code> suffix on a model id that selects a catalog variant — e.g. <code>:free</code> for the free tier of that model.</dd>
+  </dl>
 
   <h2>Inference Bridge mapping</h2>
   <p>Bridge’s OpenAI adapter posts to <code>api.openai.com/v1/chat/completions</code>. An OpenRouter adapter is the same shape with:</p>
@@ -102,7 +137,9 @@ const client = new OpenAI({
 
   <footer>
     <p>
-      Lessons: <a href="../lessons/0001-first-openrouter-call.html">0001 First OpenRouter Call</a> ·
+      Lessons:
+      <a href="../lessons/0001-first-openrouter-call.html">0001 First OpenRouter Call</a> ·
+      <a href="../lessons/0002-free-models-router.html">0002 Free Models Router</a> ·
       Mission: <a href="../MISSION.md">MISSION.md</a>
     </p>
   </footer>
