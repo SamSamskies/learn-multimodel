@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenRouter Basics — Reference</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    h1 { max-width: 18ch; }
+    .term { margin: 1.25rem 0; }
+    .term dt {
+      font-family: system-ui, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .term dd { margin: 0.25rem 0 0; }
+  </style>
+</head>
+<body>
+  <div class="lesson-meta">Reference · OpenRouter</div>
+  <h1>OpenRouter Basics</h1>
+
+  <p class="epigraph">
+    One OpenAI-compatible endpoint. Many models. You still own routing decisions.
+  </p>
+
+  <h2>Endpoints</h2>
+  <table>
+    <thead>
+      <tr><th>Use</th><th>URL</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Chat Completions (apps / Bridge)</td>
+        <td><code>https://openrouter.ai/api/v1/chat/completions</code></td>
+      </tr>
+      <tr>
+        <td>OpenAI SDK <code>baseURL</code></td>
+        <td><code>https://openrouter.ai/api/v1</code></td>
+      </tr>
+      <tr>
+        <td>Cursor BYOK override</td>
+        <td><code>https://openrouter.ai/api/v1/cursor</code></td>
+      </tr>
+      <tr>
+        <td>List models</td>
+        <td><code>GET /api/v1/models</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Auth</h2>
+  <pre class="example">Authorization: Bearer sk-or-v1-...</pre>
+  <p>Keys live at <a href="https://openrouter.ai/settings/keys">openrouter.ai/settings/keys</a>. Credits are separate from Cursor Pro and OpenAI platform billing.</p>
+
+  <h2>Model IDs</h2>
+  <p>Prefer <code>provider/model</code> slugs from <a href="https://openrouter.ai/models">openrouter.ai/models</a>.</p>
+  <pre class="example">openai/gpt-4o-mini
+anthropic/claude-sonnet-4
+google/gemini-2.5-flash</pre>
+  <p>Router aliases (when documented) may use a <code>~</code> prefix — copy the exact string from the catalog.</p>
+
+  <h2>OpenAI SDK drop-in</h2>
+  <pre class="example">import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+  defaultHeaders: {
+    "HTTP-Referer": "https://your-site.example",
+    "X-OpenRouter-Title": "your-app-name",
+  },
+});</pre>
+  <p>Optional headers help rankings on OpenRouter; they are not required for a successful call.</p>
+
+  <h2>Glossary seeds</h2>
+  <dl class="term">
+    <dt>Gateway</dt>
+    <dd>A service that accepts one client protocol and routes to many upstream model providers (OpenRouter, PPQ.ai).</dd>
+  </dl>
+  <dl class="term">
+    <dt>Provider (OpenRouter sense)</dt>
+    <dd>The upstream that actually runs the model (OpenAI, Anthropic, Together, …). One model slug can be served by multiple providers.</dd>
+  </dl>
+  <dl class="term">
+    <dt>Provider (Inference Bridge sense)</dt>
+    <dd>An adapter in the extension (<code>openai</code>, <code>ollama</code>, soon <code>openrouter</code>) that implements <code>streamChat</code>.</dd>
+  </dl>
+
+  <h2>Inference Bridge mapping</h2>
+  <p>Bridge’s OpenAI adapter posts to <code>api.openai.com/v1/chat/completions</code>. An OpenRouter adapter is the same shape with:</p>
+  <ul>
+    <li>URL → <code>https://openrouter.ai/api/v1/chat/completions</code></li>
+    <li>Key → OpenRouter key</li>
+    <li>Models → <code>provider/model</code> catalog (static list or <code>GET /models</code>)</li>
+  </ul>
+
+  <footer>
+    <p>
+      Lessons: <a href="../lessons/0001-first-openrouter-call.html">0001 First OpenRouter Call</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+</body>
+</html>

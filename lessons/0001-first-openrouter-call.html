@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 — Your First OpenRouter Call</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 1 · ~20 minutes</div>
+  <h1>Your First OpenRouter Call</h1>
+
+  <p class="epigraph">
+    One vendor API is a dependency. A gateway is a choice surface —
+    and Phase 4 is about choosing with evidence.
+  </p>
+
+  <p>
+    Your mission is to ship multi-model products — starting with
+    <a href="https://github.com/SamSamskies/inference-bridge">Inference Bridge</a> —
+    without hardcoding your career to a single provider. OpenRouter is the on-ramp:
+    one OpenAI-compatible API, hundreds of models, pay-per-token credits.
+  </p>
+
+  <h2>What OpenRouter is (and isn’t)</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Thing</th>
+        <th>Role</th>
+        <th>You pay</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>OpenAI Platform</td>
+        <td>First-party models + APIs</td>
+        <td>OpenAI API credits</td>
+      </tr>
+      <tr>
+        <td>Cursor Pro</td>
+        <td>Editor agent product</td>
+        <td>Subscription / included usage</td>
+      </tr>
+      <tr>
+        <td>OpenRouter</td>
+        <td>Multi-model <em>gateway</em></td>
+        <td>OpenRouter credits</td>
+      </tr>
+      <tr>
+        <td>Ollama (LocalLab)</td>
+        <td>Local inference</td>
+        <td>Your machine, not a gateway bill</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <strong>Separate bills</strong><br>
+    Cursor Pro does not fund OpenRouter. OpenAI platform credits do not fund OpenRouter.
+    You need an <a href="https://openrouter.ai/">openrouter.ai</a> account and a small credit balance
+    for this lesson.
+  </div>
+
+  <p>
+    OpenRouter speaks the familiar
+    <a href="https://openrouter.ai/docs/quickstart">Chat Completions</a> shape.
+    That matters for Bridge: your existing OpenAI provider already streams
+    <code>/v1/chat/completions</code> — OpenRouter is mostly a different
+    <code>baseURL</code>, key, and <code>provider/model</code> slug.
+  </p>
+
+  <h2>Setup (one time)</h2>
+
+  <div class="steps">
+    <div class="step">
+      <strong>Step 1</strong>
+      <span>Create an account at <a href="https://openrouter.ai/">openrouter.ai</a>.</span>
+    </div>
+    <div class="step">
+      <strong>Step 2</strong>
+      <span>Add a small credit balance (a few dollars is enough for weeks of practice). Set a spend limit if the UI offers one.</span>
+    </div>
+    <div class="step">
+      <strong>Step 3</strong>
+      <span>Create a key at <a href="https://openrouter.ai/settings/keys">Settings → Keys</a>. It should start with <code>sk-or-</code>.</span>
+    </div>
+    <div class="step">
+      <strong>Step 4</strong>
+      <span>In this repo, copy <code>.env.example</code> → <code>.env</code> and paste the key as <code>OPENROUTER_API_KEY</code>.</span>
+    </div>
+  </div>
+
+  <pre class="example">cp .env.example .env
+# edit .env:
+OPENROUTER_API_KEY=sk-or-v1-...</pre>
+
+  <h2>The call</h2>
+
+  <p>
+    Point the official OpenAI SDK at OpenRouter. Same client, different host —
+    documented in the
+    <a href="https://openrouter.ai/docs/quickstart">OpenRouter quickstart</a>.
+  </p>
+
+  <pre class="example">import "dotenv/config";
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+  defaultHeaders: {
+    "HTTP-Referer": "https://github.com/SamSamskies/learn-multimodel",
+    "X-OpenRouter-Title": "learn-multimodel",
+  },
+});
+
+const completion = await client.chat.completions.create({
+  model: "openai/gpt-4o-mini",
+  messages: [
+    { role: "user", content: "Say hello in exactly five words." },
+  ],
+});
+
+console.log(completion.choices[0].message.content);
+console.log(completion.usage);
+console.log(completion.model);</pre>
+
+  <p>
+    Notice the model id: <code>openai/gpt-4o-mini</code> — <em>provider/model</em>,
+    not a bare OpenAI name. Browse live slugs and prices on
+    <a href="https://openrouter.ai/models">openrouter.ai/models</a>.
+  </p>
+
+  <div class="callout">
+    <strong>Why this maps to Bridge</strong><br>
+    Inference Bridge’s OpenAI adapter posts to
+    <code>https://api.openai.com/v1/chat/completions</code>.
+    An OpenRouter adapter is the same streaming loop with
+    <code>https://openrouter.ai/api/v1/chat/completions</code>,
+    an OpenRouter key, and <code>provider/model</code> ids.
+    Keep the
+    <a href="../reference/openrouter-basics.html">OpenRouter Basics</a>
+    reference open when you wire that provider later.
+  </div>
+
+  <h2>Read what came back</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>What to notice</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>choices[0].message.content</code></td>
+        <td>The assistant text — same Chat Completions shape as OpenAI.</td>
+      </tr>
+      <tr>
+        <td><code>model</code></td>
+        <td>May differ slightly from what you requested (routing / aliases). Log both.</td>
+      </tr>
+      <tr>
+        <td><code>usage</code></td>
+        <td>Token counts — your unit economics. Habit from Phase 3: measure, don’t guess.</td>
+      </tr>
+      <tr>
+        <td><code>id</code></td>
+        <td>Request id for debugging in the OpenRouter activity/credits UI.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. OpenRouter is a gateway: one client protocol, many upstream models.","false":"Not quite. OpenRouter aggregates many providers — it is not a single-vendor or local-only runtime."}'>
+    <h3>1. What does OpenRouter primarily give you?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Route chat through one gateway</button>
+      <button data-correct="false">Call only one vendor directly</button>
+      <button data-correct="false">Run models only on local disk</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. Drop-in means new baseURL + OpenRouter key; the Chat Completions client stays familiar.","false":"You must change the host and auth — a bare OpenAI key against api.openai.com is a different bill."}'>
+    <h3>2. Using the OpenAI SDK with OpenRouter, you change…</h3>
+    <div class="quiz-options">
+      <button data-correct="true">OpenRouter host URL and key</button>
+      <button data-correct="false">Same OpenAI host, new model</button>
+      <button data-correct="false">Local Ollama host, no cloud</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. OpenRouter model ids are typically provider/model slugs from the catalog.","false":"Bare OpenAI-style names alone are not the OpenRouter convention — check the catalog slug."}'>
+    <h3>3. How do OpenRouter model ids usually look?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">provider/model ID strings</button>
+      <button data-correct="false">unprefixed name strings</button>
+      <button data-correct="false">hardware index strings</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~10-minute win:</strong> a real OpenRouter completion from this machine.</p>
+    <ol>
+      <li>At the repo root: <code>npm install</code></li>
+      <li>Copy <code>.env.example</code> → <code>.env</code> and set <code>OPENROUTER_API_KEY</code></li>
+      <li>Run <code>npm run practice -- 1</code> (or <code>node practice/0001-hello.mjs</code>)</li>
+      <li>Confirm five words of greeting, a <code>usage</code> object, and a returned <code>model</code></li>
+      <li>Optional: try another cheap slug — <code>npm run practice -- 1 --model anthropic/claude-3.5-haiku</code> (or set <code>OPENROUTER_MODEL</code> in <code>.env</code>)</li>
+    </ol>
+    <p>
+      When that works, you have the integration shape Inference Bridge needs for an OpenRouter provider —
+      before we touch the extension code.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary source:
+    <a href="https://openrouter.ai/docs/quickstart">OpenRouter Quickstart</a>
+    (API + OpenAI SDK drop-in sections).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "learn-multimodel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "practice": "node scripts/run-practice.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "openai": "^4.86.0"
+  }
+}
