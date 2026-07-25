@@ -10,6 +10,12 @@
   `GET /api/v1/models` schema, filters (`sort`, `supported_parameters`, `max_price`, …), pagination, single-model lookup. Use for: Lesson 4 — Bridge model picker from live catalog.
 - [List models API reference](https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties)
   OpenAPI for query params and response shapes. Use for: confirming filter names when coding.
+- [Provider Routing](https://openrouter.ai/docs/guides/routing/provider-selection)
+  `provider` object: `order`, `only`, `ignore`, `allow_fallbacks`, `sort`, price/latency/throughput prefs. Use for: Lesson 5 — shape which upstream serves a model.
+- [Model Fallbacks](https://openrouter.ai/docs/guides/routing/model-fallbacks)
+  Opt-in `models` array for cross-model recovery (downtime, 429, context, moderation). Use for: Lesson 5 — floor model after provider failover is exhausted.
+- [Reliability / failover explainer](https://openrouter.ai/blog/insights/reliability-failover/)
+  Provider failover vs model fallbacks in plain language. Use for: clarifying the two layers before coding.
 - [Free Models Router (`openrouter/free`)](https://openrouter.ai/docs/guides/routing/routers/free-router)
   Router that picks an available free model (capability-aware). Contrast with `:free` variant on a specific slug. Use for: Lesson 2.
 - [Free Variant (`:free`)](https://openrouter.ai/docs/guides/routing/model-variants/free)

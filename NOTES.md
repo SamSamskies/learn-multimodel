@@ -22,8 +22,9 @@
 - ✅ Lesson 1 — first OpenRouter call (SDK drop-in)
 - ✅ Lesson 2 — `openrouter/free` vs `:free` pin
 - ✅ Lesson 3 — `usage.cost` + client latency on every call
-- ✅ / in progress Lesson 4 — `GET /models` catalog (filter/sort → Bridge picker)
-- **Next after 4:** provider preferences / fallbacks — then Fusion — then Inference Bridge OpenRouter adapter
+- ✅ Lesson 4 — `GET /models` catalog (filter/sort → Bridge picker)
+- ✅ / in progress Lesson 5 — provider preferences + model fallbacks (`provider` / `models[]`)
+- **Next after 5:** Fusion — then Inference Bridge OpenRouter adapter
 - **`openrouter/fusion`** — multi-model deliberation (panel + judge + web tools); price = sum of underlying completions; Quality/Budget presets or override via fusion plugin. Reach for when cost-of-wrong > extra completions. Docs: https://openrouter.ai/docs/guides/features/plugins/fusion · catalog: https://openrouter.ai/openrouter/fusion
 
 ## Teaching note (2026-07-24)

@@ -160,6 +160,40 @@ console.log(completion.model, completion.usage, latencyMs);</pre>
     the habit Fusion and Bridge need before “which model won?” debates.
   </p>
 
+  <h2>Provider prefs &amp; fallbacks</h2>
+  <p>
+    One model slug can be served by many upstreams. OpenRouter recovers in
+    <a href="https://openrouter.ai/docs/guides/routing/provider-selection">two layers</a>:
+  </p>
+  <table>
+    <thead>
+      <tr><th>Layer</th><th>Default</th><th>Config</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Provider failover (same model, next host)</td>
+        <td>On</td>
+        <td><code>provider</code>: <code>order</code>, <code>only</code>, <code>ignore</code>, <code>allow_fallbacks</code>, <code>sort</code></td>
+      </tr>
+      <tr>
+        <td>Model fallbacks (different model)</td>
+        <td>Off</td>
+        <td><code>models</code> array in priority order</td>
+      </tr>
+    </tbody>
+  </table>
+  <pre class="example">{
+  "model": "openai/gpt-4o-mini",
+  "provider": { "sort": "latency", "allow_fallbacks": true },
+  "models": ["google/gemini-2.5-flash"],
+  "messages": [ … ]
+}</pre>
+  <p>
+    Slug shortcuts: <code>:nitro</code> → sort throughput; <code>:floor</code> → sort price.
+    Audit who served you: <code>GET /api/v1/generation?id=…</code> → <code>provider_name</code>.
+    Narrowing <code>only</code>/<code>ignore</code>/<code>order</code> reduces recovery options.
+  </p>
+
   <h2>OpenAI SDK drop-in</h2>
   <pre class="example">import OpenAI from "openai";
 
@@ -194,6 +228,14 @@ const client = new OpenAI({
     <dt>Variant suffix</dt>
     <dd>A <code>:</code> suffix on a model id that selects a catalog variant — e.g. <code>:free</code> for the free tier of that model.</dd>
   </dl>
+  <dl class="term">
+    <dt>Provider failover</dt>
+    <dd>Automatic try of another upstream for the <em>same</em> model when the chosen provider errors (default <code>allow_fallbacks: true</code>).</dd>
+  </dl>
+  <dl class="term">
+    <dt>Model fallback</dt>
+    <dd>Opt-in walk of a <code>models</code> list when the primary model cannot complete (downtime, 429, context, moderation).</dd>
+  </dl>
 
   <h2>Inference Bridge mapping</h2>
   <p>Bridge’s OpenAI adapter posts to <code>api.openai.com/v1/chat/completions</code>. An OpenRouter adapter is the same shape with:</p>
@@ -210,6 +252,7 @@ const client = new OpenAI({
       <a href="../lessons/0002-free-models-router.html">0002 Free Models Router</a> ·
       <a href="../lessons/0003-usage-and-cost.html">0003 Read Cost and Latency</a> ·
       <a href="../lessons/0004-models-catalog.html">0004 Models Catalog</a> ·
+      <a href="../lessons/0005-provider-fallbacks.html">0005 Provider Prefs and Fallbacks</a> ·
       Mission: <a href="../MISSION.md">MISSION.md</a>
     </p>
   </footer>

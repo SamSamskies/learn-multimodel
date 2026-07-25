@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 5 — Provider Prefs and Fallbacks</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 5 · ~20 minutes</div>
+  <h1>Provider Prefs and Fallbacks</h1>
+
+  <p class="epigraph">
+    One model slug is not one server.
+    Reliability is two layers: failover across providers, then fallback across models.
+  </p>
+
+  <p>
+    You can
+    <a href="./0004-models-catalog.html">discover</a> a slug and
+    <a href="./0003-usage-and-cost.html">measure</a> a call.
+    Inference Bridge also needs the call to
+    <em>survive</em> upstream hiccups. OpenRouter does that in two layers —
+    documented in
+    <a href="https://openrouter.ai/docs/guides/routing/provider-selection">Provider Routing</a>
+    and
+    <a href="https://openrouter.ai/docs/guides/routing/model-fallbacks">Model Fallbacks</a>.
+  </p>
+
+  <h2>Two layers, two failure modes</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Provider failover</th>
+        <th>Model fallbacks</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>What it recovers</td>
+        <td>Outage / 429 on the host serving <em>this</em> model</td>
+        <td>Whole model down, context-length errors, moderation refusals</td>
+      </tr>
+      <tr>
+        <td>Default</td>
+        <td>On (<code>allow_fallbacks: true</code>)</td>
+        <td>Off until you set a <code>models</code> array</td>
+      </tr>
+      <tr>
+        <td>What changes</td>
+        <td>Upstream provider (same model id)</td>
+        <td>Which model answers</td>
+      </tr>
+      <tr>
+        <td>You configure</td>
+        <td><code>provider</code> object</td>
+        <td><code>models</code> (priority list)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <strong>Don’t conflate the glossary</strong><br>
+    OpenRouter <em>provider</em> = upstream that runs the model (OpenAI, Together, …).
+    Inference Bridge <em>provider</em> = adapter in the extension.
+    Same word, different layer — see
+    <a href="../reference/openrouter-basics.html">OpenRouter Basics</a>.
+  </div>
+
+  <h2>Shape the provider pool</h2>
+
+  <p>
+    Put a <code>provider</code> object on the Chat Completions body
+    (<a href="https://openrouter.ai/docs/guides/routing/provider-selection">docs</a>).
+    Defaults load-balance for uptime + price. Setting <code>order</code> or <code>sort</code>
+    disables that load balancing and tries providers in a fixed sequence.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Use when…</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>order</code></td>
+        <td>Try these provider slugs first, in this order</td>
+      </tr>
+      <tr>
+        <td><code>only</code> / <code>ignore</code></td>
+        <td>Allow-list or block-list endpoints</td>
+      </tr>
+      <tr>
+        <td><code>allow_fallbacks</code></td>
+        <td><code>false</code> = hard-stop on your picks (compliance / BYOK); default <code>true</code></td>
+      </tr>
+      <tr>
+        <td><code>sort</code></td>
+        <td><code>"price"</code>, <code>"latency"</code>, or <code>"throughput"</code> (no LB)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <pre class="example">// JSON body (OpenAI SDK: pass via cast — types omit OpenRouter fields)
+{
+  "model": "openai/gpt-4o-mini",
+  "provider": {
+    "sort": "latency",
+    "ignore": ["deepinfra"],
+    "allow_fallbacks": true
+  },
+  "messages": [ … ]
+}
+
+// Shortcuts on the slug (same as provider.sort):
+//   model: "…:nitro"  → sort throughput
+//   model: "…:floor"  → sort price</pre>
+
+  <p>
+    Narrowing with <code>only</code> / <code>ignore</code> / <code>order</code> trades
+    <em>control</em> for <em>recovery options</em> — fewer eligible hosts means fewer places
+    to fail over
+    (<a href="https://openrouter.ai/blog/insights/reliability-failover/">reliability guide</a>).
+  </p>
+
+  <h2>Opt in to model fallbacks</h2>
+
+  <p>
+    When every provider for the primary model fails (or the model itself refuses),
+    walk a second list:
+  </p>
+
+  <pre class="example">{
+  "model": "openai/gpt-4o-mini",
+  "models": ["google/gemini-2.5-flash"],   // tried in order if primary errors
+  "messages": [ … ]
+}</pre>
+
+  <p>
+    Put a reliable cheap “floor” model last. You’re billed for the model that
+    <em>actually</em> ran — check returned <code>model</code>. With the OpenAI JS SDK,
+    pass <code>provider</code> / <code>models</code> on the create call (cast past types);
+    Python docs use <code>extra_body</code>
+    (<a href="https://openrouter.ai/docs/guides/routing/model-fallbacks">Model Fallbacks</a>).
+  </p>
+
+  <div class="callout">
+    <strong>Mission link</strong><br>
+    Bridge’s OpenRouter adapter should expose provider prefs and a fallback list —
+    not just a single slug. Audit who served you with
+    <a href="https://openrouter.ai/docs/api/api-reference/generations/get-request-&amp;-usage-metadata-for-a-generation"><code>GET /api/v1/generation?id=…</code></a>
+    → <code>provider_name</code> (Lesson 3’s audit URL, now with a name on it).
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. Provider failover (allow_fallbacks, default on) keeps the same model on another host.","false":"Same-model outages are provider failover — models[] is a different model entirely."}'>
+    <h3>1. A provider 5xx hits your chosen model. What recovers first?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Provider failover by default</button>
+      <button data-correct="false">Model array across models</button>
+      <button data-correct="false">Manual retry in client</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. allow_fallbacks: false hard-stops on your order/only set — no automatic backups.","false":"false means no backup providers — not “try any host” and not “jump models”."}'>
+    <h3>2. What does <code>allow_fallbacks: false</code> mean?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Only chosen providers run</button>
+      <button data-correct="false">Any backup may serve</button>
+      <button data-correct="false">Next model always runs</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. The models array is opt-in fallback across different model ids on error.","false":"models[] changes which model answers — not same-model host failover or automatic cheapest routing."}'>
+    <h3>3. What is the <code>models</code> array for?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Different model on error</button>
+      <button data-correct="false">Same model new host</button>
+      <button data-correct="false">Cheaper price every time</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~10-minute win:</strong> see <code>provider_name</code> change with prefs, and wire a <code>models</code> floor.</p>
+    <ol>
+      <li>From the repo root: <code>npm run practice -- 5</code></li>
+      <li>Compare default vs <code>provider.sort: "latency"</code> — note <code>provider_name</code> and <code>latency_ms</code></li>
+      <li>Confirm the <code>models[]</code> call returns a model from your list (usually the primary)</li>
+      <li>Optional: <code>npm run practice -- 5 --model google/gemini-2.5-flash</code></li>
+    </ol>
+    <p>
+      When you can point at <code>provider_name</code> on the generation audit and explain
+      “failover vs fallback,” you have the reliability knobs Bridge needs.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary source:
+    <a href="https://openrouter.ai/docs/guides/routing/provider-selection">Provider Routing</a>
+    (pair with
+    <a href="https://openrouter.ai/docs/guides/routing/model-fallbacks">Model Fallbacks</a>).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Prev: <a href="./0004-models-catalog.html">0004 Models Catalog</a> ·
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>
