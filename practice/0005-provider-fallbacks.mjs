@@ -72,22 +72,35 @@ async function once(label, body) {
 }
 
 /**
+ * Generation stats are eventually consistent — immediate GET often 404s
+ * until OpenRouter indexes the request (commonly ~1–10s).
  * @param {string} id
  * @returns {Promise<{ provider_name?: string; model?: string } | null>}
  */
 async function fetchGeneration(id) {
   const url = new URL("https://openrouter.ai/api/v1/generation");
   url.searchParams.set("id", id);
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    console.warn(`generation lookup ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  /** Backoff until indexed; total wait stays under ~15s. */
+  const waitsMs = [0, 500, 1000, 2000, 4000, 7000];
+
+  for (let i = 0; i < waitsMs.length; i++) {
+    if (waitsMs[i] > 0) await new Promise((r) => setTimeout(r, waitsMs[i]));
+    const res = await fetch(url, { headers });
+    if (res.ok) {
+      const json = /** @type {{ data?: Record<string, unknown> }} */ (await res.json());
+      return {
+        provider_name:
+          json.data?.provider_name != null ? String(json.data.provider_name) : undefined,
+        model: json.data?.model != null ? String(json.data.model) : undefined,
+      };
+    }
+    const body = (await res.text()).slice(0, 200);
+    const last = i === waitsMs.length - 1;
+    if (res.status === 404 && !last) continue;
+    console.warn(`generation lookup ${res.status}: ${body}`);
     return null;
   }
-  const json = /** @type {{ data?: Record<string, unknown> }} */ (await res.json());
-  return {
-    provider_name: json.data?.provider_name != null ? String(json.data.provider_name) : undefined,
-    model: json.data?.model != null ? String(json.data.model) : undefined,
-  };
+  return null;
 }
 
 console.log("Lesson 5: provider preferences + model fallbacks");
