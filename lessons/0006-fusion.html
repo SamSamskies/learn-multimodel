@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6 — Fusion Deliberation</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 6 · ~20 minutes</div>
+  <h1>Fusion Deliberation</h1>
+
+  <p class="epigraph">
+    One model answers. Fusion deliberates.
+    Reach for it when being wrong costs more than a few extra completions.
+  </p>
+
+  <p>
+    You can
+    <a href="./0005-provider-fallbacks.html">survive outages</a> and
+    <a href="./0003-usage-and-cost.html">read the bill</a>.
+    The mission also asks for <em>quality</em> judgment — when one slug isn’t enough.
+    OpenRouter’s answer is
+    <a href="https://openrouter.ai/docs/guides/features/plugins/fusion">Fusion</a>:
+    a panel of models, a judge that compares (not merges), then a final answer.
+  </p>
+
+  <h2>The pipeline</h2>
+
+  <ol>
+    <li>Your outer model decides whether to invoke <code>openrouter:fusion</code>.</li>
+    <li>A <strong>panel</strong> answers in parallel (each with web search / fetch).</li>
+    <li>A <strong>judge</strong> returns structured analysis: consensus, contradictions, unique insights, blind spots.</li>
+    <li>The outer model writes the final answer from that analysis.</li>
+  </ol>
+
+  <p>
+    The judge does <em>not</em> majority-vote into one blob — it surfaces agreement and disagreement
+    (<a href="https://openrouter.ai/docs/guides/features/plugins/fusion">Fusion docs</a>).
+    Deliberation is one level deep: panel/judge cannot recurse into Fusion again.
+  </p>
+
+  <div class="callout warn">
+    <strong>Bill = sum of the parts</strong><br>
+    Fusion charges for panel + judge + outer completions (and any web tools they use).
+    Latency stacks the fan-out. Use it when quality matters; skip it for “one word: ok.”
+  </div>
+
+  <h2>Three entry points, one pipeline</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Entry</th>
+        <th>When</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>model: "openrouter/fusion"</code></td>
+        <td>Drop-in alias — Quality defaults if you pass no plugin config</td>
+      </tr>
+      <tr>
+        <td><code>plugins: [{ id: "fusion", … }]</code></td>
+        <td>Configure panel / judge / preset on any call (including the alias)</td>
+      </tr>
+      <tr>
+        <td><code>tools: [{ type: "openrouter:fusion" }]</code></td>
+        <td>Most control — attach to <em>your</em> outer model; force with <code>tool_choice: "required"</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <pre class="example">// Budget practice shape (alias + plugin)
+{
+  "model": "openrouter/fusion",
+  "plugins": [{
+    "id": "fusion",
+    "analysis_models": ["google/gemini-2.5-flash", "openai/gpt-4o-mini"],
+    "model": "google/gemini-2.5-flash"   // judge (+ final writer with the alias)
+  }],
+  "messages": [ … ]
+}
+
+// Or a curated preset — no model picking:
+// "plugins": [{ "id": "fusion", "preset": "general-budget" }]</pre>
+
+  <p>
+    Presets: <code>general-high</code>, <code>general-budget</code>, <code>general-fast</code>
+    (task + tier). Explicit <code>analysis_models</code> / <code>model</code> override a preset
+    (<a href="https://openrouter.ai/docs/guides/features/plugins/fusion#presets">docs</a>).
+  </p>
+
+  <div class="callout">
+    <strong>Mission link</strong><br>
+    Evidence-based model choice includes knowing when <em>not</em> to Fusion —
+    and logging <code>usage.cost</code> so you can prove the multiplier.
+    Bridge may expose Fusion later as an advanced mode; the OpenRouter adapter itself
+    is next after this lesson.
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. The judge returns structured analysis (consensus, contradictions, …) — not a merged vote.","false":"The judge compares panel outputs into structured analysis JSON; it does not average or pick cheapest."}'>
+    <h3>1. What does the Fusion judge produce?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Structured analysis as JSON</button>
+      <button data-correct="false">Averaged panel vote text</button>
+      <button data-correct="false">Single cheapest model pick</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. Docs: use Fusion when cost of being wrong outweighs a few extra completions.","false":"Fusion is for high-stakes / multi-perspective tasks — not every short prompt or free-only traffic."}'>
+    <h3>2. When should you reach for Fusion?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Wrong costs more than spend</button>
+      <button data-correct="false">Every short prompt needs it</button>
+      <button data-correct="false">Only free models require it</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. You pay the sum of panel, judge, and outer completions (plus tools).","false":"Fusion is not a flat fee or outer-only bill — every underlying completion adds up."}'>
+    <h3>3. How is a Fusion call billed?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Sum of underlying completions</button>
+      <button data-correct="false">Only the outer model</button>
+      <button data-correct="false">Flat zero gateway fee</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~10-minute win:</strong> same compare/contrast prompt — one model vs Fusion — compare cost and latency.</p>
+    <ol>
+      <li>From the repo root: <code>npm run practice -- 6</code></li>
+      <li>Note the cost ratio (Fusion should be several × the baseline)</li>
+      <li>Skim both previews — was the multi-model answer worth it for <em>this</em> task?</li>
+      <li>Optional: try <code>preset: "general-budget"</code> in the practice file (higher spend than the cheap panel)</li>
+    </ol>
+    <p>
+      When you can say “Fusion when wrong is expensive; else one slug + fallbacks,”
+      the OpenRouter foundation for Bridge is complete.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary source:
+    <a href="https://openrouter.ai/docs/guides/features/plugins/fusion">Fusion plugin</a>
+    (pair with
+    <a href="https://openrouter.ai/docs/guides/features/server-tools/fusion">openrouter:fusion server tool</a>).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Prev: <a href="./0005-provider-fallbacks.html">0005 Provider Prefs and Fallbacks</a> ·
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

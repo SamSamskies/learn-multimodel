@@ -26,8 +26,10 @@
   Typed shape for `usage` fields including `cost` / `cost_details`. Use for: confirming field names in practice scripts.
 - [Generation metadata](https://openrouter.ai/docs/api/api-reference/generations/get-request-&-usage-metadata-for-a-generation)
   `GET /api/v1/generation?id=` for post-hoc cost/latency/provider stats. Use for: auditing after a call when the completion body isn’t enough.
-- [Fusion (`openrouter/fusion`)](https://openrouter.ai/docs/guides/features/plugins/fusion)
-  Multi-model deliberation (panel + judge); also available as plugin/server tool. Billed as sum of underlying completions. Catalog page: [openrouter/fusion](https://openrouter.ai/openrouter/fusion). Use for: future Fusion lesson when single-model calls feel limiting.
+- [Fusion plugin (`openrouter/fusion`)](https://openrouter.ai/docs/guides/features/plugins/fusion)
+  Multi-model deliberation (panel + judge analysis + final answer); presets and `plugins` config. Billed as sum of underlying completions. Catalog: [openrouter/fusion](https://openrouter.ai/openrouter/fusion). Use for: Lesson 6.
+- [Fusion server tool (`openrouter:fusion`)](https://openrouter.ai/docs/guides/features/server-tools/fusion)
+  Same pipeline as the alias/plugin; attach to any outer model; force with `tool_choice: "required"`. Use for: Lesson 6 control path and Bridge “advanced mode” later.
 - [OpenRouter API Keys](https://openrouter.ai/settings/keys)
   Key creation and credit management. Use for: setup before Lesson 1 practice.
 - [OpenRouter + Cursor integration](https://openrouter.ai/docs/cookbook/coding-agents/cursor-integration)

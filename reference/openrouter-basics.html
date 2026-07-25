@@ -194,6 +194,46 @@ console.log(completion.model, completion.usage, latencyMs);</pre>
     Narrowing <code>only</code>/<code>ignore</code>/<code>order</code> reduces recovery options.
   </p>
 
+  <h2>Fusion</h2>
+  <p>
+    <a href="https://openrouter.ai/docs/guides/features/plugins/fusion">Fusion</a>
+    runs a panel in parallel, a judge that returns structured analysis (consensus,
+    contradictions, insights, blind spots), then a final answer. Use when
+    cost-of-wrong &gt; sum of extra completions. Bill = all underlying completions.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Entry</th><th>Shape</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Alias</td>
+        <td><code>model: "openrouter/fusion"</code> (Quality defaults)</td>
+      </tr>
+      <tr>
+        <td>Plugin</td>
+        <td><code>plugins: [{ id: "fusion", preset | analysis_models, model }]</code></td>
+      </tr>
+      <tr>
+        <td>Server tool</td>
+        <td><code>tools: [{ type: "openrouter:fusion" }]</code> — force with <code>tool_choice: "required"</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <pre class="example">"plugins": [{ "id": "fusion", "preset": "general-budget" }]
+// presets: general-high | general-budget | general-fast
+// explicit analysis_models / model override preset</pre>
+  <p>
+    Catalog / lab:
+    <a href="https://openrouter.ai/openrouter/fusion">openrouter/fusion</a>,
+    <a href="https://openrouter.ai/docs/guides/features/server-tools/fusion">server tool docs</a>.
+  </p>
+
+  <dl class="term">
+    <dt>Fusion</dt>
+    <dd>OpenRouter multi-model deliberation: panel → judge analysis → outer final answer. Alias <code>openrouter/fusion</code>, plugin <code>id: "fusion"</code>, or tool <code>openrouter:fusion</code>.</dd>
+  </dl>
+
   <h2>OpenAI SDK drop-in</h2>
   <pre class="example">import OpenAI from "openai";
 
@@ -253,6 +293,7 @@ const client = new OpenAI({
       <a href="../lessons/0003-usage-and-cost.html">0003 Read Cost and Latency</a> ·
       <a href="../lessons/0004-models-catalog.html">0004 Models Catalog</a> ·
       <a href="../lessons/0005-provider-fallbacks.html">0005 Provider Prefs and Fallbacks</a> ·
+      <a href="../lessons/0006-fusion.html">0006 Fusion Deliberation</a> ·
       Mission: <a href="../MISSION.md">MISSION.md</a>
     </p>
   </footer>
