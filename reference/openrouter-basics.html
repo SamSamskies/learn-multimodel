@@ -45,7 +45,11 @@
       </tr>
       <tr>
         <td>List models</td>
-        <td><code>GET /api/v1/models</code></td>
+        <td><code>GET /api/v1/models</code> (filters: <code>sort</code>, <code>max_price</code>, <code>supported_parameters</code>, <code>q</code>, …)</td>
+      </tr>
+      <tr>
+        <td>Single model</td>
+        <td><code>GET /api/v1/model/{author}/{slug}</code></td>
       </tr>
     </tbody>
   </table>
@@ -93,6 +97,33 @@ provider/model:free   ← pin only after confirming it is still free</pre>
     (seen with former free pins like <code>meta-llama/llama-3.2-3b-instruct:free</code> and <code>tencent/hy3:free</code>).
     Prefer <code>openrouter/free</code> for exploration; pin only a slug you just verified (router response or
     <a href="https://openrouter.ai/models?q=free">models?q=free</a>). Always compare <em>requested</em> vs <em>returned</em> <code>model</code>.
+  </p>
+
+  <h2>Models catalog</h2>
+  <p>
+    <a href="https://openrouter.ai/docs/guides/overview/models"><code>GET /api/v1/models</code></a>
+    returns live catalog metadata for pickers (Bridge). Prefer server-side
+    <code>sort</code> / filters over downloading everything.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Field</th><th>Use</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>Slug for Chat Completions <code>model</code></td></tr>
+      <tr><td><code>pricing.prompt</code> / <code>completion</code></td><td>USD <em>per token</em> (string); <code>"0"</code> = free; ×1e6 → $/M display</td></tr>
+      <tr><td><code>supported_parameters</code></td><td>e.g. <code>tools</code>, <code>structured_outputs</code></td></tr>
+      <tr><td><code>context_length</code></td><td>Max context window</td></tr>
+    </tbody>
+  </table>
+  <pre class="example">// Cheapest tool-capable text models
+GET /api/v1/models?supported_parameters=tools&amp;sort=pricing-low-to-high&amp;limit=15
+
+// Free-tier prompt price ($/M)
+GET /api/v1/models?max_price=0&amp;sort=pricing-low-to-high</pre>
+  <p>
+    List price ≠ billed cost: catalog pricing is the sticker;
+    <code>usage.cost</code> on a completion is what you paid.
   </p>
 
   <h2>Usage, cost, latency</h2>
@@ -178,6 +209,7 @@ const client = new OpenAI({
       <a href="../lessons/0001-first-openrouter-call.html">0001 First OpenRouter Call</a> ·
       <a href="../lessons/0002-free-models-router.html">0002 Free Models Router</a> ·
       <a href="../lessons/0003-usage-and-cost.html">0003 Read Cost and Latency</a> ·
+      <a href="../lessons/0004-models-catalog.html">0004 Models Catalog</a> ·
       Mission: <a href="../MISSION.md">MISSION.md</a>
     </p>
   </footer>

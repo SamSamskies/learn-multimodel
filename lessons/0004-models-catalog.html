@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4 — Query the Models Catalog</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 4 · ~15 minutes</div>
+  <h1>Query the Models Catalog</h1>
+
+  <p class="epigraph">
+    A model picker is not a hardcoded list.
+    It is a filtered view of a live catalog — with price and capability before you call.
+  </p>
+
+  <p>
+    Lessons
+    <a href="./0001-first-openrouter-call.html">1</a>–<a href="./0003-usage-and-cost.html">3</a>
+    taught you to <em>call</em> and <em>measure</em>. Inference Bridge still needs a way to
+    <em>discover</em> what you can call. OpenRouter’s answer is
+    <a href="https://openrouter.ai/docs/guides/overview/models"><code>GET /api/v1/models</code></a>
+    — the same data behind <a href="https://openrouter.ai/models">openrouter.ai/models</a>,
+    shaped for apps.
+  </p>
+
+  <h2>What you get back</h2>
+
+  <p>
+    Each item is a Model object. For a Bridge-style picker you care about a handful of fields
+    (full schema in the
+    <a href="https://openrouter.ai/docs/guides/overview/models">Models guide</a>):
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Why it matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>id</code></td>
+        <td>Slug you pass as <code>model</code> on Chat Completions.</td>
+      </tr>
+      <tr>
+        <td><code>name</code></td>
+        <td>Human label for UI.</td>
+      </tr>
+      <tr>
+        <td><code>pricing</code></td>
+        <td>USD per token (strings). <code>"0"</code> means free for that dimension.</td>
+      </tr>
+      <tr>
+        <td><code>context_length</code></td>
+        <td>Max context window (tokens).</td>
+      </tr>
+      <tr>
+        <td><code>supported_parameters</code></td>
+        <td>What the API accepts (<code>tools</code>, <code>structured_outputs</code>, …).</td>
+      </tr>
+      <tr>
+        <td><code>architecture</code></td>
+        <td>Input/output modalities — vision vs text-only.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <pre class="example">GET https://openrouter.ai/api/v1/models
+Authorization: Bearer sk-or-v1-…
+
+// Response (shape abbreviated)
+{
+  "data": [ { "id": "…", "name": "…", "pricing": { "prompt": "0", "completion": "0", … }, … } ],
+  "total_count": 150,
+  "links": { "next": null }   // or a next-page URL when you paginate
+}</pre>
+
+  <div class="callout warn">
+    <strong>Pricing units</strong><br>
+    Catalog <code>pricing.prompt</code> / <code>completion</code> are <em>per token</em> (USD strings).
+    Multiply by <code>1e6</code> to display familiar “$/M tokens”. That is <em>list</em> price —
+    Lesson 3’s <code>usage.cost</code> is what you were actually billed for a call.
+  </div>
+
+  <h2>Filter and sort on the server</h2>
+
+  <p>
+    Prefer query params over downloading everything and filtering locally
+    (per the <a href="https://openrouter.ai/docs/guides/overview/models">docs</a>):
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Param</th>
+        <th>Example use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>sort</code></td>
+        <td><code>pricing-low-to-high</code>, <code>latency-low-to-high</code>, <code>newest</code>, …</td>
+      </tr>
+      <tr>
+        <td><code>supported_parameters</code></td>
+        <td><code>tools</code> — models that accept function calling</td>
+      </tr>
+      <tr>
+        <td><code>max_price</code></td>
+        <td>Cap prompt price in <strong>$/M tokens</strong> (e.g. <code>0</code> for free-tier list)</td>
+      </tr>
+      <tr>
+        <td><code>q</code></td>
+        <td>Free-text search by name or slug</td>
+      </tr>
+      <tr>
+        <td><code>output_modalities</code></td>
+        <td>Default is <code>text</code>; use <code>all</code> or <code>image</code> when needed</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Mission link</strong><br>
+    Inference Bridge’s OpenRouter adapter should not ship a stale slug list.
+    Pull (or cache) <code>GET /models</code>, show <code>id</code> + price + capabilities,
+    then let the user pick — the same “evidence before vibes” habit as Phase 3 evals.
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. The models list endpoint is how apps discover live slugs and metadata.","false":"Chat Completions run a model — discovery of the catalog is GET /api/v1/models."}'>
+    <h3>1. How should an app discover available OpenRouter models?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Call the models list endpoint</button>
+      <button data-correct="false">Guess the models from blogs</button>
+      <button data-correct="false">Ship one hardcoded model list</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. Catalog pricing is USD per token; multiply by 1e6 for $/M display.","false":"pricing.prompt is per-token USD — not already $/M and not your billed usage.cost."}'>
+    <h3>2. What unit is <code>pricing.prompt</code> in the catalog?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Dollars charged per input token</button>
+      <button data-correct="false">Dollars charged per million toks</button>
+      <button data-correct="false">Dollars billed on last invoice</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. Use sort and filter query params so the server narrows the catalog.","false":"Docs prefer server-side sort/filter — avoid always downloading the full list first."}'>
+    <h3>3. How should you get the cheapest tool-capable models?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Sort and filter via query</button>
+      <button data-correct="false">Pull and filter every model</button>
+      <button data-correct="false">Skip and check the invoice</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~10-minute win:</strong> print a tiny “picker” from the live catalog — no Chat Completions.</p>
+    <ol>
+      <li>From the repo root: <code>npm run practice -- 4</code></li>
+      <li>Confirm you see free models (<code>$0</code>) and a short cheapest-paid slice</li>
+      <li>Note which rows advertise <code>tools</code> in <code>supported_parameters</code></li>
+      <li>Optional: search — <code>npm run practice -- 4 --model gemini</code> (uses <code>q=</code>)</li>
+    </ol>
+    <p>
+      When you can turn catalog JSON into “id + $/M + capabilities,” you have the data shape
+      Inference Bridge needs for an OpenRouter model picker.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary source:
+    <a href="https://openrouter.ai/docs/guides/overview/models">Models API guide</a>
+    (plus the
+    <a href="https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties">list-models reference</a>).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Prev: <a href="./0003-usage-and-cost.html">0003 Read Cost and Latency</a> ·
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>
