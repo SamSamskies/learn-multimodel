@@ -28,6 +28,8 @@
   `GET /api/v1/generation?id=` for post-hoc cost/latency/provider stats. Use for: auditing after a call when the completion body isn’t enough.
 - [Fusion plugin (`openrouter/fusion`)](https://openrouter.ai/docs/guides/features/plugins/fusion)
   Multi-model deliberation (panel + judge analysis + final answer); presets and `plugins` config. Billed as sum of underlying completions. Catalog: [openrouter/fusion](https://openrouter.ai/openrouter/fusion). Use for: Lesson 6.
+- [Pareto Router (`openrouter/pareto-code`)](https://openrouter.ai/docs/guides/routing/routers/pareto-router)
+  Coding-only router: `min_coding_score` (0–1) maps to AA coding percentile tiers; picks cheapest available in-tier (or fastest with `:nitro`); session stickiness for multi-turn. Catalog: [openrouter/pareto-code](https://openrouter.ai/openrouter/pareto-code). Use for: queued OpenRouter lesson (contrast with free router + explicit model fallbacks).
 - [Fusion server tool (`openrouter:fusion`)](https://openrouter.ai/docs/guides/features/server-tools/fusion)
   Same pipeline as the alias/plugin; attach to any outer model; force with `tool_choice: "required"`. Use for: Lesson 6 control path and Bridge “advanced mode” later.
 - [OpenRouter API Keys](https://openrouter.ai/settings/keys)
