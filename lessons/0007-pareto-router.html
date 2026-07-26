@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 7 — Pareto Code Router</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 7 · ~20 minutes</div>
+  <h1>Pareto Code Router</h1>
+
+  <p class="epigraph">
+    Don’t pin a forever coding slug.
+    Set a quality floor; let OpenRouter pick the cheapest model that clears it.
+  </p>
+
+  <p>
+    You already met a
+    <a href="./0002-free-models-router.html">capability-aware free lottery</a>,
+    <a href="./0005-provider-fallbacks.html">explicit model fallbacks</a>, and
+    <a href="./0006-fusion.html">Fusion deliberation</a>.
+    For day-to-day <em>coding</em>, OpenRouter’s
+    <a href="https://openrouter.ai/docs/guides/routing/routers/pareto-router">Pareto Router</a>
+    answers a different question: “strong enough coder, without overspending.”
+  </p>
+
+  <h2>One knob: <code>min_coding_score</code></h2>
+
+  <p>
+    Call <code>model: "openrouter/pareto-code"</code> and optionally pass the
+    <code>pareto-router</code> plugin with a score from <code>0</code> to <code>1</code>
+    (<a href="https://openrouter.ai/docs/guides/routing/routers/pareto-router">docs</a>).
+    The score maps to an
+    <a href="https://artificialanalysis.ai/">Artificial Analysis</a> coding
+    <em>percentile</em> tier — not an absolute IQ number. As the field moves, “top of the field” stays relative.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th><code>min_coding_score</code></th>
+        <th>Tier</th>
+        <th>Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>&gt;= 0.66</code> (or omitted)</td>
+        <td>high</td>
+        <td>Top of AA’s coding field (default)</td>
+      </tr>
+      <tr>
+        <td><code>&gt;= 0.33</code>, <code>&lt; 0.66</code></td>
+        <td>medium</td>
+        <td>Strong modern flagships below the tip</td>
+      </tr>
+      <tr>
+        <td><code>&lt; 0.33</code></td>
+        <td>low</td>
+        <td>Capable coders still above AA’s median</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Pareto, not random</strong><br>
+    Within the tier: cheapest available model (or fastest p50 with
+    <code>openrouter/pareto-code:nitro</code>). Plus up to two same-tier fallbacks
+    for transient errors — not load balancing across the shortlist.
+  </div>
+
+  <pre class="example">{
+  "model": "openrouter/pareto-code",
+  "session_id": "my-coding-session-123",
+  "plugins": [{ "id": "pareto-router", "min_coding_score": 0.5 }],
+  "messages": [ … ]
+}</pre>
+
+  <h2>Contrast the three routers you now know</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th><code>openrouter/free</code></th>
+        <th><code>models[]</code></th>
+        <th><code>pareto-code</code></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Job</td>
+        <td>$0 lottery (capability filter)</td>
+        <td>Your explicit recovery chain</td>
+        <td>Coding floor → cheap in-tier</td>
+      </tr>
+      <tr>
+        <td>You choose</td>
+        <td>Almost nothing</td>
+        <td>Exact slug order</td>
+        <td>Score / tier (+ optional <code>:nitro</code>)</td>
+      </tr>
+      <tr>
+        <td>Eval stability</td>
+        <td>Weak (slug churn)</td>
+        <td>Strong if pinned</td>
+        <td>Weak long-term (shortlist moves)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <strong>Coding only + bill the winner</strong><br>
+    The router adds no fee; you pay the underlying model. High tier can resolve to
+    expensive frontier coders. For fixed benchmarks, pin a slug — don’t use Pareto
+    as your eval target. See
+    <a href="https://openrouter.ai/docs/guides/routing/routers/pareto-router#limitations">limitations</a>.
+  </div>
+
+  <h2>Session stickiness</h2>
+
+  <p>
+    Multi-turn coding hates mid-thread model switches (style drift, cold cache).
+    Pareto pins <strong>model + provider</strong> for the conversation:
+    automatic fingerprinting after cache hits, or set <code>session_id</code> so
+    stickiness starts on the first success
+    (<a href="https://openrouter.ai/docs/guides/routing/routers/pareto-router#session-stickiness">docs</a>).
+    Cache expires after ~5 minutes idle.
+  </p>
+
+  <div class="callout">
+    <strong>Mission link</strong><br>
+    Evidence-based routing includes “quality floor without forever-slug.”
+    Bridge can expose Pareto as a coding preset later; next product step is still
+    the OpenRouter adapter itself.
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. Score maps to AA coding percentile tiers; within-tier pick is cheapest (or :nitro fastest).","false":"Pareto is not free-lottery or your hand-written models[] list — it is a coding-score tier router."}'>
+    <h3>1. What does <code>min_coding_score</code> control?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Coding quality tier floor</button>
+      <button data-correct="false">Exact forever model slug</button>
+      <button data-correct="false">Free lottery only routing</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. Within the tier the router prefers cheapest available (throughput with :nitro).","false":"Selection inside a tier is by price (or :nitro speed), not Fusion-style deliberation."}'>
+    <h3>2. How does Pareto pick inside a tier?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Cheapest available in tier</button>
+      <button data-correct="false">Random free catalog pick</button>
+      <button data-correct="false">Panel judge synthesis vote</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. session_id (or implicit fingerprint) pins model + provider for multi-turn cache/consistency.","false":"Stickiness is for multi-turn consistency — not a Fusion panel and not a billing discount."}'>
+    <h3>3. Why pass a <code>session_id</code>?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Pin model for multi-turn</button>
+      <button data-correct="false">Force Fusion panel mode</button>
+      <button data-correct="false">Waive all token charges</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~10-minute win:</strong> same coding prompt — low vs medium score — compare returned models and cost.</p>
+    <ol>
+      <li>From the repo root: <code>npm run practice -- 7</code></li>
+      <li>Note which concrete <code>model</code> each tier returned</li>
+      <li>Confirm the follow-up with the same <code>session_id</code> stayed sticky (or note why not)</li>
+      <li>Optional: <code>npm run practice -- 7 --model openrouter/pareto-code:nitro</code> for throughput sorting</li>
+    </ol>
+    <p>
+      When you can say “Pareto for coding floors; pin for evals; free router for $0 experiments,”
+      you’re ready to land OpenRouter in Inference Bridge.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary source:
+    <a href="https://openrouter.ai/docs/guides/routing/routers/pareto-router">Pareto Router</a>
+    (catalog:
+    <a href="https://openrouter.ai/openrouter/pareto-code">openrouter/pareto-code</a>).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Prev: <a href="./0006-fusion.html">0006 Fusion Deliberation</a> ·
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

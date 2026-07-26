@@ -24,10 +24,11 @@
 - ✅ Lesson 3 — `usage.cost` + client latency on every call
 - ✅ Lesson 4 — `GET /models` catalog (filter/sort → Bridge picker)
 - ✅ Lesson 5 — provider preferences + model fallbacks (`provider` / `models[]`)
-- ✅ / in progress Lesson 6 — Fusion (`openrouter/fusion` / plugin / server tool)
-- **Queued (learner request):** Pareto Router (`openrouter/pareto-code`) — coding-only router; `min_coding_score` → AA coding percentile tiers (high/medium/low); cheapest (or `:nitro` fastest) in tier + same-tier fallbacks; session stickiness for multi-turn cache. Natural contrast with Lesson 2 free router (random free) and Lesson 5 explicit fallbacks. Docs: https://openrouter.ai/docs/guides/routing/routers/pareto-router · catalog: https://openrouter.ai/openrouter/pareto-code
-- **Next after 6:** Inference Bridge OpenRouter adapter (land skills in product) — or insert Pareto as a short OpenRouter add-on before/after Bridge if coding-route judgment feels more urgent
+- ✅ Lesson 6 — Fusion (`openrouter/fusion` / plugin / server tool)
+- ✅ / in progress Lesson 7 — Pareto Router (`openrouter/pareto-code` + `min_coding_score`)
+- **Next after 7:** Inference Bridge OpenRouter adapter (land skills in product)
 - **`openrouter/fusion`** — multi-model deliberation (panel + judge + web tools); price = sum of underlying completions; presets `general-high` / `general-budget` / `general-fast` or override via fusion plugin. Reach for when cost-of-wrong > extra completions. Docs: https://openrouter.ai/docs/guides/features/plugins/fusion · catalog: https://openrouter.ai/openrouter/fusion
+- **`openrouter/pareto-code`** — coding-only router; `min_coding_score` → AA coding percentile tiers; cheapest (or `:nitro`) in tier + same-tier fallbacks; `session_id` stickiness. Docs: https://openrouter.ai/docs/guides/routing/routers/pareto-router
 
 ## Teaching note (2026-07-24)
 - User finds the lesson format fun — keep ~15–20 min, build-heavy, one tangible win

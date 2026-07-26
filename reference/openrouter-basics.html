@@ -234,6 +234,33 @@ console.log(completion.model, completion.usage, latencyMs);</pre>
     <dd>OpenRouter multi-model deliberation: panel → judge analysis → outer final answer. Alias <code>openrouter/fusion</code>, plugin <code>id: "fusion"</code>, or tool <code>openrouter:fusion</code>.</dd>
   </dl>
 
+  <h2>Pareto Code Router</h2>
+  <p>
+    <a href="https://openrouter.ai/docs/guides/routing/routers/pareto-router">Pareto Router</a>
+    (<code>openrouter/pareto-code</code>) is coding-only: set
+    <code>min_coding_score</code> (0–1) → AA coding percentile tier → cheapest
+    available in-tier (or fastest with <code>:nitro</code>). Same-tier fallbacks
+    on transient errors. No router fee — you pay the underlying model.
+    Shortlist evolves; pin a slug for stable evals.
+  </p>
+  <pre class="example">"model": "openrouter/pareto-code",
+"session_id": "…",  // pin model+provider for multi-turn / cache
+"plugins": [{ "id": "pareto-router", "min_coding_score": 0.5 }]</pre>
+  <table>
+    <thead>
+      <tr><th>Score</th><th>Tier</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>&gt;= 0.66</code> / omitted</td><td>high (default)</td></tr>
+      <tr><td><code>0.33–0.66</code></td><td>medium</td></tr>
+      <tr><td><code>&lt; 0.33</code></td><td>low</td></tr>
+    </tbody>
+  </table>
+  <dl class="term">
+    <dt>Pareto Router</dt>
+    <dd>Coding router: quality floor via <code>min_coding_score</code>, then cheapest (or <code>:nitro</code>) in tier. Alias <code>openrouter/pareto-code</code>, plugin <code>id: "pareto-router"</code>.</dd>
+  </dl>
+
   <h2>OpenAI SDK drop-in</h2>
   <pre class="example">import OpenAI from "openai";
 
