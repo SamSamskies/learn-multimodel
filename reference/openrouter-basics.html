@@ -305,11 +305,13 @@ const client = new OpenAI({
   </dl>
 
   <h2>Inference Bridge mapping</h2>
-  <p>Bridge’s OpenAI adapter posts to <code>api.openai.com/v1/chat/completions</code>. An OpenRouter adapter is the same shape with:</p>
+  <p>Bridge’s OpenAI adapter posts to <code>api.openai.com/v1/chat/completions</code>. An OpenRouter adapter is the same <code>Provider</code> shape with:</p>
   <ul>
     <li>URL → <code>https://openrouter.ai/api/v1/chat/completions</code></li>
-    <li>Key → OpenRouter key</li>
-    <li>Models → <code>provider/model</code> catalog (static list or <code>GET /models</code>)</li>
+    <li>Key → dedicated OpenRouter key in extension storage (not the page)</li>
+    <li>Models → curated <code>provider/model</code> list (or later <code>listModels</code> via <code>GET /models</code>)</li>
+    <li>Register in <code>src/providers/registry.js</code>; add <code>https://openrouter.ai/*</code> host permission</li>
+    <li><strong>Do not</strong> change IPA: <code>accepted</code> → <code>delta*</code> → <code>done</code> / <code>InferenceError</code></li>
   </ul>
 
   <footer>
@@ -321,6 +323,8 @@ const client = new OpenAI({
       <a href="../lessons/0004-models-catalog.html">0004 Models Catalog</a> ·
       <a href="../lessons/0005-provider-fallbacks.html">0005 Provider Prefs and Fallbacks</a> ·
       <a href="../lessons/0006-fusion.html">0006 Fusion Deliberation</a> ·
+      <a href="../lessons/0007-pareto-router.html">0007 Pareto Code Router</a> ·
+      <a href="../lessons/0008-bridge-openrouter-adapter.html">0008 Bridge OpenRouter Adapter</a> ·
       Mission: <a href="../MISSION.md">MISSION.md</a>
     </p>
   </footer>

@@ -29,7 +29,11 @@
 - [Fusion plugin (`openrouter/fusion`)](https://openrouter.ai/docs/guides/features/plugins/fusion)
   Multi-model deliberation (panel + judge analysis + final answer); presets and `plugins` config. Billed as sum of underlying completions. Catalog: [openrouter/fusion](https://openrouter.ai/openrouter/fusion). Use for: Lesson 6.
 - [Pareto Router (`openrouter/pareto-code`)](https://openrouter.ai/docs/guides/routing/routers/pareto-router)
-  Coding-only router: `min_coding_score` (0–1) maps to AA coding percentile tiers; picks cheapest available in-tier (or fastest with `:nitro`); session stickiness for multi-turn. Catalog: [openrouter/pareto-code](https://openrouter.ai/openrouter/pareto-code). Use for: queued OpenRouter lesson (contrast with free router + explicit model fallbacks).
+  Coding-only router: `min_coding_score` (0–1) maps to AA coding percentile tiers; picks cheapest available in-tier (or fastest with `:nitro`); session stickiness for multi-turn. Catalog: [openrouter/pareto-code](https://openrouter.ai/openrouter/pareto-code). Use for: Lesson 7.
+- [Inference Provider API SPEC](https://github.com/SamSamskies/inference-provider-api/blob/main/SPEC.md)
+  Normative page contract (`window.inference.request`, chunks, error codes). Use for: Lesson 8 — what Bridge must not break when adding providers.
+- [App Attribution (OpenRouter)](https://openrouter.ai/docs/app-attribution)
+  Optional `HTTP-Referer` / title headers for rankings. Use for: Bridge OpenRouter adapter polish.
 - [Fusion server tool (`openrouter:fusion`)](https://openrouter.ai/docs/guides/features/server-tools/fusion)
   Same pipeline as the alias/plugin; attach to any outer model; force with `tool_choice: "required"`. Use for: Lesson 6 control path and Bridge “advanced mode” later.
 - [OpenRouter API Keys](https://openrouter.ai/settings/keys)

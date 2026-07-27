@@ -25,10 +25,12 @@
 - ✅ Lesson 4 — `GET /models` catalog (filter/sort → Bridge picker)
 - ✅ Lesson 5 — provider preferences + model fallbacks (`provider` / `models[]`)
 - ✅ Lesson 6 — Fusion (`openrouter/fusion` / plugin / server tool)
-- ✅ / in progress Lesson 7 — Pareto Router (`openrouter/pareto-code` + `min_coding_score`)
-- **Next after 7:** Inference Bridge OpenRouter adapter (land skills in product)
+- ✅ Lesson 7 — Pareto Router (`openrouter/pareto-code` + `min_coding_score`)
+- ✅ / in progress Lesson 8 — Bridge-shaped OpenRouter `Provider` (practice in this repo → port to Bridge)
+- **Next after 8:** Land OpenRouter in Inference Bridge (registry + `openrouterApiKey` + host_permissions + Options); then Anthropic arc
 - **`openrouter/fusion`** — multi-model deliberation (panel + judge + web tools); price = sum of underlying completions; presets `general-high` / `general-budget` / `general-fast` or override via fusion plugin. Reach for when cost-of-wrong > extra completions. Docs: https://openrouter.ai/docs/guides/features/plugins/fusion · catalog: https://openrouter.ai/openrouter/fusion
 - **`openrouter/pareto-code`** — coding-only router; `min_coding_score` → AA coding percentile tiers; cheapest (or `:nitro`) in tier + same-tier fallbacks; `session_id` stickiness. Docs: https://openrouter.ai/docs/guides/routing/routers/pareto-router
+- **Bridge Provider** — JSDoc `Provider` in `src/providers/openai.js`; register in `registry.js`; IPA `window.inference` untouched; prefer dedicated `openrouterApiKey` over reusing `openaiApiKey`
 
 ## Teaching note (2026-07-24)
 - User finds the lesson format fun — keep ~15–20 min, build-heavy, one tangible win

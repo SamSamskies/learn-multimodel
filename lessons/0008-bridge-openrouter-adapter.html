@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 8 — Bridge OpenRouter Adapter</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+  <div class="lesson-meta">Lesson 8 · ~25 minutes</div>
+  <h1>Bridge OpenRouter Adapter</h1>
+
+  <p class="epigraph">
+    Gateway literacy becomes product when it fits the Provider contract —
+    without rewriting the page API.
+  </p>
+
+  <p>
+    Lessons 1–7 taught you to call OpenRouter with evidence: routers, cost,
+    catalog, failover, Fusion, Pareto. Your mission’s proving ground is
+    <a href="https://github.com/SamSamskies/inference-bridge">Inference Bridge</a>.
+    Today you draft the adapter that turns that literacy into a selectable
+    provider beside OpenAI and Ollama.
+  </p>
+
+  <h2>Two contracts, one adapter</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Surface</th>
+        <th>Who sees it</th>
+        <th>Rule</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>IPA</strong> (<code>window.inference</code>)</td>
+        <td>Web pages</td>
+        <td><em>Do not change</em> — chunks, errors, permission story stay stable</td>
+      </tr>
+      <tr>
+        <td><strong>Provider</strong> (internal)</td>
+        <td>Extension only</td>
+        <td>Clone <code>openai.js</code> / <code>ollama.js</code>; register in <code>registry.js</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Bridge’s README says the quiet part out loud: implement the same shape as
+    the existing providers, register it, extend Options if you need another
+    credential. The page still gets <code>accepted</code> → <code>delta*</code> →
+    <code>done</code> (or an <code>InferenceError</code>). Keys never leave the extension
+    (<a href="https://github.com/SamSamskies/inference-bridge">Bridge README</a>).
+  </p>
+
+  <h2>What you clone from OpenAI</h2>
+
+  <p>
+    OpenRouter’s
+    <a href="https://openrouter.ai/docs/quickstart">Chat Completions</a> path is
+    OpenAI-compatible. Bridge’s OpenAI adapter already streams SSE to
+    <code>/v1/chat/completions</code> and maps usage. Your OpenRouter file is that
+    adapter with three intentional diffs:
+  </p>
+
+  <ol>
+    <li><strong>URL</strong> → <code>https://openrouter.ai/api/v1/chat/completions</code></li>
+    <li><strong>Auth</strong> → OpenRouter key (<code>sk-or-…</code>), not an OpenAI platform key</li>
+    <li><strong>Models</strong> → <code>provider/model</code> slugs (curated list now; live <code>GET /models</code> later)</li>
+  </ol>
+
+  <pre class="example">{
+  id: "openrouter",
+  label: "OpenRouter",
+  requiresApiKey: true,
+  defaultModel: "openrouter/free",
+  models: [ "openrouter/free", "openai/gpt-4o-mini", … ],
+  streamChat({ apiKey, model, messages, signal, onDelta }) { … }
+}</pre>
+
+  <div class="callout">
+    <strong>Optional attribution</strong><br>
+    OpenRouter’s quickstart allows <code>HTTP-Referer</code> and
+    <code>X-OpenRouter-Title</code> so your app can appear on their rankings.
+    Nice for Bridge; not required for the IPA contract.
+  </div>
+
+  <h2>Key storage: don’t paper over it</h2>
+
+  <p>
+    Today Bridge stores one field: <code>openaiApiKey</code>. Reusing it for OpenRouter
+    “works” for a demo and lies forever after. Prefer a dedicated
+    <code>openrouterApiKey</code> (Options label + service-worker branch) so users
+    can keep both providers configured. Host permission:
+    <code>https://openrouter.ai/*</code>.
+  </p>
+
+  <div class="callout warn">
+    <strong>Scope for this lesson</strong><br>
+    Practice ships a <em>portable</em> Provider in this repo and smoke-tests
+    streaming. Porting into Bridge (registry, manifest, Options, tests) is the
+    checklist at the end — same shape, product wiring.
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz1" data-messages='{"true":"Correct. Pages keep the IPA chunk/error contract; only the internal Provider adapter is new.","false":"Adding OpenRouter must not rewrite window.inference — change the Provider layer only."}'>
+    <h3>1. What must stay stable when adding OpenRouter?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">IPA chunk and error codes</button>
+      <button data-correct="false">OpenAI curated model list</button>
+      <button data-correct="false">Options password field id</button>
+    </div>
+    <div class="feedback" id="quiz1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz2" data-messages='{"true":"Correct. Same SSE Completions shape — swap endpoint, key, and provider/model slugs.","false":"You are not inventing a new page API; you are cloning the OpenAI stream adapter for OpenRouter."}'>
+    <h3>2. Clone <code>openai.js</code> — change what first?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Endpoint URL and API key</button>
+      <button data-correct="false">Page-facing IPA contract</button>
+      <button data-correct="false">Options UI label strings</button>
+    </div>
+    <div class="feedback" id="quiz2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="quiz3" data-messages='{"true":"Correct. Bridge keeps BYOK in extension storage; pages never see the key.","false":"Keys must not be injected into page scripts or hardcoded in content scripts."}'>
+    <h3>3. Where do API keys live in Bridge?</h3>
+    <div class="quiz-options">
+      <button data-correct="true">Extension storage only</button>
+      <button data-correct="false">Every page can read it</button>
+      <button data-correct="false">Inside content scripts</button>
+    </div>
+    <div class="feedback" id="quiz3-feedback"></div>
+  </div>
+
+  <h2>Do this now</h2>
+
+  <div class="practice">
+    <p><strong>~15-minute win:</strong> run a Bridge-shaped OpenRouter <code>streamChat</code> and confirm deltas + resolved model.</p>
+    <ol>
+      <li>From the repo root: <code>npm run practice -- 8</code></li>
+      <li>Confirm the Provider shape check passes and you see streamed text</li>
+      <li>Note <code>model returned</code> (especially if you used <code>openrouter/free</code>)</li>
+      <li>Optional: <code>npm run practice -- 8 --model openai/gpt-4o-mini</code></li>
+      <li>Read the printed Bridge port checklist — that’s your next product commit</li>
+    </ol>
+    <p>
+      When you can say “Provider clone + registry; IPA untouched; separate OpenRouter key,”
+      you’re ready to land it in Inference Bridge for real.
+    </p>
+  </div>
+
+  <p class="source">
+    Primary sources:
+    <a href="https://github.com/SamSamskies/inference-bridge">Inference Bridge README</a>
+    (provider + registry pattern) ·
+    <a href="https://openrouter.ai/docs/quickstart">OpenRouter Quickstart</a>
+    (Completions + optional attribution headers).
+  </p>
+
+  <footer>
+    <p>Stuck? Ask your agent teacher — paste the error and what you tried.</p>
+    <p style="margin-top: 0.75rem;">
+      Prev: <a href="./0007-pareto-router.html">0007 Pareto Code Router</a> ·
+      Reference: <a href="../reference/openrouter-basics.html">OpenRouter Basics</a> ·
+      Mission: <a href="../MISSION.md">MISSION.md</a>
+    </p>
+  </footer>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>
